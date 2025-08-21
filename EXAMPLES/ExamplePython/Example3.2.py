@@ -19,7 +19,7 @@
 # Date: June 2017
 
 # import the OpenSees Python module
-from openseespy.opensees import *
+from opensees import *
 
 # ----------------------------------------------------
 # Start of Model Generation & Initial Gravity Analysis

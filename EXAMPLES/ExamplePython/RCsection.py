@@ -42,7 +42,7 @@
 # Written: Andreas Schellenberg (andreas.schellenberg@gmail.com)
 # Date: June 2017
 
-from openseespy.opensees import *
+from opensees import *
 
 def create(id, h, b, cover, coreID, coverID, steelID, numBars, barArea, nfCoreY, nfCoreZ, nfCoverY, nfCoverZ, GJ):
     
