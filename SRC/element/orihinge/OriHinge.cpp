@@ -6,7 +6,6 @@
 #include <Node.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
-#include <UniaxialMaterial.h>
 #include <Renderer.h>
 
 #include <Parameter.h>
@@ -17,39 +16,146 @@
 
 #include <ElementResponse.h>
 
+Matrix OriHinge::theMatrix(24, 24);
+Matrix OriHinge::theMass(24, 24);
+Vector OriHinge::theVector(12);
+Vector OriHinge::theLoad(12);
+Vector OriHinge::J(12);
+Matrix OriHinge::d2thetadxi2(12, 12);
 #include <elementAPI.h>
 
-// Nose
-static int numOriHinge = 0;
-
 #define OPS_Export
-OPS_Export void *OPS_OriHinge()
+OPS_Export void *OPS_OriHingeElement()
 {
 	Element *theElement = 0;
-	if (OPS_GetNumRemainingInputArgs() < 5)
+	int numRemainingArgs = OPS_GetNumRemainingInputArgs();
+	if (numRemainingArgs < 5)
 	{
 		opserr << "ERROR: insufficient args for OriHinge element\n";
 		return 0;
 	}
 
 	int tag, nd1, nd2, nd3, nd4;
-	int numArgs = 5;
 	int iData[5];
-	if (OPS_GetIntInput(&numArgs, iData) != 0)
-		return nullptr;
+	int numArgs = 5;
+	if (OPS_GetInt(&numArgs, iData) != 0)
+	{
+
+		opserr << "WARNING invalid integer (tag, nd1, nd2, nd3, nd4) in element OriHinge " << endln;
+		return 0;
+	}
 
 	tag = iData[0];
 	nd1 = iData[1];
 	nd2 = iData[2];
 	nd3 = iData[3];
 	nd4 = iData[4];
+	theElement = new OriHinge(tag, nd1, nd2, nd3, nd4);
+	if (theElement == 0)
+	{
+		opserr << "WARNING: out of memory: element CorotTruss " << iData[0] << " $iNode $jNode $A $matTag <-rho $rho> <-cMass $flag> <-doRayleigh $flag>\n";
+	}
 
-	return new OriHinge(tag, nd1, nd2, nd3, nd4);
+	return theElement;
+}
+
+void *
+OPS_OriHingeElement(const ID &info)
+{
+	if (info.Size() == 0)
+		return 0;
+
+	Element *theElement = 0;
+
+	int iData[5];
+
+	int nd1 = 0;
+	int nd2 = 0;
+	int nd3 = 0;
+	int nd4 = 0;
+
+	static std::map<int, Vector> meshdata;
+	if (info(0) == 1)
+	{
+
+		int numRemainingArgs = OPS_GetNumRemainingInputArgs();
+		if (numRemainingArgs < 4)
+		{
+			opserr << "Invalid Args want: element CorotTruss $A $matTag <-rho $rho> <-cMass $flag> <-doRayleigh $flag>\n";
+			return 0;
+		}
+		int numData = 1;
+		if (OPS_GetInt(&numData, &nd1) != 0)
+		{
+			opserr << "WARNING: Invalid nd1: \n";
+			return 0;
+		}
+		numData = 2;
+		if (OPS_GetInt(&numData, &nd2) != 0)
+		{
+			opserr << "WARNING: Invalid nd2: \n";
+			return 0;
+		}
+		numData = 3;
+		if (OPS_GetInt(&numData, &nd3) != 0)
+		{
+			opserr << "WARNING: Invalid nd3: \n";
+			return 0;
+		}
+		numData = 4;
+		if (OPS_GetInt(&numData, &nd4) != 0)
+		{
+			opserr << "WARNING: Invalid nd4: \n";
+			return 0;
+		}
+
+		if (info.Size() < 2)
+		{
+			opserr << "WARNING: need info -- inmesh, meshtag\n";
+			return 0;
+		}
+
+		// save the data for a mesh
+		Vector &mdata = meshdata[info(1)];
+		mdata.resize(4);
+		mdata(0) = (double)nd1;
+		mdata(1) = (double)nd1;
+		mdata(2) = (double)nd3;
+		mdata(3) = (double)nd4;
+		return &meshdata;
+	}
+	else if (info(0) == 2)
+	{
+
+		if (info.Size() < 7)
+		{
+			opserr << "WARNING: need info -- inmesh, meshtag, eleTag, nd1, nd2\n";
+			return 0;
+		}
+
+		Vector &mdata = meshdata[info(1)];
+		if (mdata.Size() < 4)
+			return 0;
+
+		iData[0] = info(2);
+		iData[1] = info(3);
+		iData[2] = info(4);
+		iData[3] = info(5);
+		iData[4] = info(6);
+	}
+	theElement = new OriHinge(iData[0], iData[1], iData[2], iData[3], iData[4]);
+
+	if (theElement == 0)
+	{
+		opserr << "WARNING: out of memory: element CorotTruss " << iData[0] << " $iNode $jNode $A $matTag <-rho $rho> <-cMass $flag> <-doRayleigh $flag>\n";
+	}
+
+	return theElement;
 }
 
 // ----- Constructores -----
 OriHinge::OriHinge()
-	: Element(0, ELE_TAG_OriHinge), connectedExternalNodes(4), theMatrix(0), theMass(0), theVector(0), J(12), d2thetadxi2(12, 12), theLoad(0)
+	: Element(0, ELE_TAG_OriHinge), connectedExternalNodes(4)
 {
 	for (int i = 0; i < 4; i++)
 		theNodes[i] = 0;
@@ -58,7 +164,7 @@ OriHinge::OriHinge()
 }
 
 OriHinge::OriHinge(int tag, int node1, int node2, int node3, int node4)
-	: Element(tag, ELE_TAG_OriHinge), connectedExternalNodes(4), theMatrix(0), theMass(0), theVector(0), J(12), d2thetadxi2(12, 12), theLoad(0)
+	: Element(tag, ELE_TAG_OriHinge), connectedExternalNodes(4)
 {
 	connectedExternalNodes(0) = node1;
 	connectedExternalNodes(1) = node2;
@@ -91,6 +197,7 @@ Node **OriHinge::getNodePtrs()
 
 void OriHinge::setDomain(Domain *theDomain)
 {
+	opserr << "Entra a domain\n";
 	if (theDomain == 0)
 	{
 		opserr << "OriHinge::setDomain - theDomain is null\n";
@@ -100,6 +207,7 @@ void OriHinge::setDomain(Domain *theDomain)
 	for (int i = 0; i < 4; i++)
 	{
 		theNodes[i] = theDomain->getNode(connectedExternalNodes(i));
+
 		if (theNodes[i] == 0)
 		{
 			opserr << "OriHinge::setDomain - node " << connectedExternalNodes(i) << " does not exist in the domain\n";
@@ -160,18 +268,20 @@ void OriHinge::calculateVectors()
 	// TODO Calcular los vectores directores incluye desplazamientos
 	// Calculates jacobian and d2thetadxi2
 	J.Zero();
+	J += 1;
 	d2thetadxi2.Zero();
+	d2thetadxi2 += 1;
 }
 float OriHinge::calculateTheta()
 {
 	// TODO Calcular el ángulo theta
-	return 0.0;
+	return 30.0 * 180.0 / PI;
 }
 
 float OriHinge::calculateThetaFromU()
 {
 	// TODO Calcular el ángulo theta a partir de los desplazamientos
-	return 0.0;
+	return 32.0 * 180.0 / PI;
 }
 
 float OriHinge::getMoment(float theta)
@@ -206,8 +316,8 @@ Matrix OriHinge::dia(Vector a, Vector b)
 
 const Matrix &OriHinge::getTangentStiff()
 {
-	Matrix &K = *theMatrix;
-	K.Zero();
+	opserr << "EntrL a la matrix\n";
+	Matrix K = theMatrix;
 	int ndof = 6;
 	double k = 1e6; // Rigidez muy alta
 	double moment = getMoment(theta);
@@ -230,13 +340,13 @@ const Matrix &OriHinge::getTangentStiff()
 		}
 	}
 
-	return K;
+	return theMatrix;
 }
 
 const Matrix &OriHinge::getInitialStiff()
 {
-	Matrix &K = *theMatrix;
-	K.Zero();
+	opserr << "EntrL a la matrix init\n";
+	Matrix K = theMatrix;
 	int ndof = 6;
 	double k = 1e6; // Rigidez muy alta
 	for (int i = 0; i < 4; i++)
@@ -257,32 +367,32 @@ const Matrix &OriHinge::getInitialStiff()
 		}
 	}
 	K *= k;
-	return *theMatrix;
+	return theMatrix;
 }
 
 const Matrix &OriHinge::getMass()
 {
-	Matrix &KK = *theMass;
+	Matrix KK = theMass;
 	KK.Zero();
-	return *theMass;
+	return theMass;
 }
 
 const Vector &OriHinge::getResistingForce()
 {
-	Vector &F = *theVector;
+	Vector F = theVector;
 	F.Zero();
 	double moment = getMoment(theta);
 	F = J * moment; // checks out
-	return *theVector;
+	return theVector;
 }
 
 const Vector &OriHinge::getResistingForceIncInertia()
 {
-	Vector &F = *theVector;
+	Vector F = theVector;
 	F.Zero();
 	double moment = getMoment(theta);
 	F = J * moment; // checks out
-	return *theVector;
+	return theVector;
 }
 
 void OriHinge::Print(OPS_Stream &s, int flag)
@@ -294,14 +404,14 @@ void OriHinge::Print(OPS_Stream &s, int flag)
 const Matrix &OriHinge::getDamp(void)
 {
 
-	Matrix &K = *theMatrix;
+	Matrix K = theMatrix;
 	K.Zero();
 
-	return *theMatrix;
+	return theMatrix;
 }
 void OriHinge::zeroLoad(void)
 {
-	theLoad->Zero();
+	theLoad.Zero();
 }
 
 int OriHinge::addLoad(ElementalLoad *theLoad, double loadFactor)

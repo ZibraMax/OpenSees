@@ -68,7 +68,7 @@ extern OPS_Routine OPS_TripleFrictionPendulumX;
 extern OPS_Routine OPS_Truss2;
 extern OPS_Routine OPS_PML3D;
 extern OPS_Routine OPS_PML2D;
-extern OPS_Routine OPS_OriHinge;
+extern OPS_Routine OPS_OriHingeElement;
 extern OPS_Routine OPS_CorotTruss2;
 extern OPS_Routine OPS_HDR;
 extern OPS_Routine OPS_LeadRubberX;

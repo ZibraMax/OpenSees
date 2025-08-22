@@ -86,7 +86,7 @@ extern void *OPS_ComponentElement3d(void);
 // extern  void *OPS_ComponentElementDamp2d(void);
 extern void *OPS_TrussElement(void);
 extern void *OPS_TrussSectionElement(void);
-extern void *OPS_OriHinge(void);
+extern void *OPS_OriHingeElement(void);
 extern void *OPS_CorotTrussElement(void);
 extern void *OPS_CorotTrussSectionElement(void);
 extern void *OPS_ElasticTubularJoint(void);
@@ -487,7 +487,7 @@ int TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
   else if ((strcmp(argv[1], "oriHinge") == 0) || (strcmp(argv[1], "OriHinge") == 0))
   {
 
-    void *theEle = OPS_OriHinge();
+    void *theEle = OPS_OriHingeElement();
     if (theEle != 0)
       theElement = (Element *)theEle;
     else

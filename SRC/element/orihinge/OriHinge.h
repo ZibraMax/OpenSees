@@ -9,7 +9,6 @@ const double PI = 3.14159265358979323846;
 
 class Node;
 class Channel;
-class UniaxialMaterial;
 
 class OriHinge : public Element
 {
@@ -23,11 +22,11 @@ public:
   const char *getClassType(void) const { return "OriHinge"; };
 
   // public methods to obtain information about dof & connectivity
-  int getNumExternalNodes(void) const override { return 4; }
+  int getNumExternalNodes(void) const { return 4; }
   const ID &getExternalNodes(void);
   Node **getNodePtrs(void);
 
-  int getNumDOF(void) override { return 24; } // 4 nodos × 6 GDL
+  int getNumDOF(void) { return 24; } // 4 nodos × 6 GDL
   void setDomain(Domain *theDomain);
 
   // public methods to set the state of the element
@@ -74,15 +73,15 @@ private:
   Node *theNodes[4];
   double theta0;
   double theta;
-  double theta1 = 10.0 * PI / 180.0;
-  double theta2 = 350.0 * PI / 180.0;
+  double theta1 = 0.0;
+  double theta2 = 0.0;
 
-  Vector *theLoad;
-  Matrix *theMass;
-  Matrix *theMatrix;
-  Vector *theVector;
-  Vector J;
-  Matrix d2thetadxi2;
+  static Vector theLoad;
+  static Matrix theMass;
+  static Matrix theMatrix;
+  static Vector theVector;
+  static Vector J;
+  static Matrix d2thetadxi2;
 };
 
 #endif
