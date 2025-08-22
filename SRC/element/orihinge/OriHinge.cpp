@@ -17,9 +17,9 @@
 
 #include <ElementResponse.h>
 
-Matrix OriHinge::K(12, 12);
-Matrix OriHinge::M(12, 12);
-Vector OriHinge::F(12);
+Matrix OriHinge::K(24, 24);
+Matrix OriHinge::M(24, 24);
+Vector OriHinge::F(24);
 
 #include <elementAPI.h>
 
@@ -104,15 +104,16 @@ void OriHinge::setDomain(Domain *theDomain)
 
 	for (int i = 0; i < 4; i++)
 	{
-		if (theNodes[i]->getNumberDOF() != 3)
+		if (theNodes[i]->getNumberDOF() != 6)
 		{
 			opserr << "OriHinge::setDomain() - Node "
 				   << connectedExternalNodes(i)
-				   << " does not have 3 DOF.\n";
+				   << " does not have 6 DOF.\n";
 		}
 	}
 
 	this->DomainComponent::setDomain(theDomain);
+	// Aquí hay que calcular un monton de cosas
 }
 
 const Matrix &OriHinge::getTangentStiff()

@@ -25,7 +25,7 @@ public:
   const ID &getExternalNodes(void);
   Node **getNodePtrs(void);
 
-  int getNumDOF(void) override { return 12; } // 4 nodos × 3 GDL
+  int getNumDOF(void) override { return 24; } // 4 nodos × 6 GDL
   void setDomain(Domain *theDomain);
 
   // public methods to set the state of the element
