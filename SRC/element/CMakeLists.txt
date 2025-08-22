@@ -39,6 +39,7 @@ add_subdirectory(brick)
 add_subdirectory(zeroLength)
 
 add_subdirectory(truss)
+add_subdirectory(orihinge)
 add_subdirectory(beam2d)
 add_subdirectory(beam3d)
 #add_subdirectory(beamWithHinges)

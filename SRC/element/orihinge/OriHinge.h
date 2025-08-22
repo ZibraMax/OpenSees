@@ -5,6 +5,8 @@
 #include <Matrix.h>
 #include <Vector.h>
 
+const double PI = 3.14159265358979323846;
+
 class Node;
 class Channel;
 class UniaxialMaterial;
@@ -33,6 +35,13 @@ public:
   int revertToLastCommit(void);
   int revertToStart(void);
   int update(void);
+  void calculateVectors(void);
+  float calculateTheta(void);
+  float calculateThetaFromU(void);
+  float getMoment(float theta);
+  // Vector jacobian(void);
+  Matrix dia(Vector a, Vector b);
+  Matrix outer(Vector a, Vector b);
 
   // public methods to obtain stiffness, mass, damping and residual information
   const Matrix &getTangentStiff(void);
@@ -63,10 +72,17 @@ protected:
 private:
   ID connectedExternalNodes; // contains the tags of the end nodes
   Node *theNodes[4];
+  double theta0;
+  double theta;
+  double theta1 = 10.0 * PI / 180.0;
+  double theta2 = 350.0 * PI / 180.0;
 
-  static Matrix M;
-  static Matrix K;
-  static Vector F;
+  Vector *theLoad;
+  Matrix *theMass;
+  Matrix *theMatrix;
+  Vector *theVector;
+  Vector J;
+  Matrix d2thetadxi2;
 };
 
 #endif
