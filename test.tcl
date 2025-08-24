@@ -36,7 +36,7 @@ element OriHinge 6 3 1 2 4 0.3
 # --- Carga nodal ---
 timeSeries Linear 1
 pattern Plain 1 1 {
-    load 4 0.0 0.0 1.0 0.0 0.0 0.0
+    load 4 0.0 0.0 0.8051921418934552 0.0 0.0 0.0
 }
 
 # --- Análisis estático ---

@@ -78,11 +78,12 @@ private:
   double theta1 = 0.0;
   double theta2 = 0.0;
   double kf;
-
+  int ndof;
+  int total_dof;
   static Vector theLoad;
-  static Matrix theMass;
-  static Matrix theMatrix;
-  static Vector theVector;
+  Matrix *theMass;
+  Matrix *theMatrix;
+  Vector *theVector;
   static Vector J;
   static Matrix d2thetadxi2;
 };

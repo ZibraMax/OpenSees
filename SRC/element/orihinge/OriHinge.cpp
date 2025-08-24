@@ -16,9 +16,6 @@
 #include <cmath>
 #include <ElementResponse.h>
 
-Matrix OriHinge::theMatrix(24, 24);
-Matrix OriHinge::theMass(24, 24);
-Vector OriHinge::theVector(12);
 Vector OriHinge::theLoad(12);
 Vector OriHinge::J(12);
 Matrix OriHinge::d2thetadxi2(12, 12);
@@ -172,17 +169,19 @@ OPS_OriHingeElement(const ID &info)
 
 // ----- Constructores -----
 OriHinge::OriHinge()
-	: Element(0, ELE_TAG_OriHinge), connectedExternalNodes(4)
+	: Element(0, ELE_TAG_OriHinge), connectedExternalNodes(4), theMatrix(0), theVector(0), theMass(0)
 {
 	for (int i = 0; i < 4; i++)
 		theNodes[i] = 0;
 	theta0 = 0.0;
 	theta = 0.0;
 	kf = 0.0;
+	ndof = 0;
+	total_dof = 0;
 }
 
 OriHinge::OriHinge(int tag, int node1, int node2, int node3, int node4, double pkf)
-	: Element(tag, ELE_TAG_OriHinge), connectedExternalNodes(4)
+	: Element(tag, ELE_TAG_OriHinge), connectedExternalNodes(4), theMatrix(0), theVector(0), theMass(0)
 {
 	connectedExternalNodes(0) = node1;
 	connectedExternalNodes(1) = node2;
@@ -194,9 +193,13 @@ OriHinge::OriHinge(int tag, int node1, int node2, int node3, int node4, double p
 	theta0 = 0.0;
 	theta = 0.0;
 	kf = pkf;
-	Matrix K(24, 24);
-	Matrix M(24, 24);
-	Vector F(24);
+	ndof = 6;
+	total_dof = ndof * 4;
+	Matrix K(total_dof, total_dof);
+	theMatrix = new Matrix(total_dof, total_dof);
+	theVector = new Vector(total_dof);
+	Matrix M(total_dof, total_dof);
+	Vector F(total_dof);
 	Vector J(12);
 	Matrix d2thetadxi2(12, 12);
 }
@@ -233,11 +236,11 @@ void OriHinge::setDomain(Domain *theDomain)
 	}
 	for (int i = 0; i < 4; i++)
 	{
-		if (theNodes[i]->getNumberDOF() != 6)
+		if (theNodes[i]->getNumberDOF() != 3 && theNodes[i]->getNumberDOF() != 6)
 		{
 			opserr << "OriHinge::setDomain() - Node "
 				   << connectedExternalNodes(i)
-				   << " does not have 6 DOF.\n";
+				   << " does not have 6 or 3 DOF.\n";
 		}
 	}
 	this->DomainComponent::setDomain(theDomain);
@@ -617,14 +620,14 @@ Matrix OriHinge::dia(Vector a, Vector b)
 
 const Matrix &OriHinge::getTangentStiff()
 {
-	opserr << "Entra a la matrix tangete\n";
-	opserr << "Theta " << theta * 180.0 / PI << endln;
-	opserr << "Theta_0 " << theta0 * 180.0 / PI << endln;
-	Matrix K = theMatrix;
-	int ndof = 6;
+	// opserr << "Entra a la matrix tangete\n";
+	// opserr << "Theta " << theta * 180.0 / PI << endln;
+	// opserr << "Theta_0 " << theta0 * 180.0 / PI << endln;
+	Matrix &K = *theMatrix;
+	K.Zero();
 	double k = getKf(theta); // Rigidez muy alta
 	double moment = getMoment(theta);
-	opserr << "M " << moment << endln;
+	// opserr << "M " << moment << endln;
 	Matrix kg = moment * d2thetadxi2;
 	Matrix ke = outer(J, J) * k;
 	Matrix kt = ke + kg;
@@ -648,19 +651,14 @@ const Matrix &OriHinge::getTangentStiff()
 
 	// opserr << "K: " << K << endln;
 
-	return theMatrix;
+	return *theMatrix;
 }
 
 const Matrix &OriHinge::getInitialStiff()
 {
-	opserr << "Entra a la matrix inicial\n";
-	opserr << "Theta " << theta * 180.0 / PI << endln;
-	opserr << "Theta_0 " << theta0 * 180.0 / PI << endln;
-	Matrix K = theMatrix;
-	int ndof = 6;
+	Matrix &K = *theMatrix;
 	double k = getKf(theta); // Rigidez muy alta
 	double moment = getMoment(theta);
-	opserr << "M " << moment << endln;
 	Matrix kg = moment * d2thetadxi2;
 	for (int i = 0; i < 4; i++)
 	{
@@ -680,36 +678,40 @@ const Matrix &OriHinge::getInitialStiff()
 		}
 	}
 
-	return theMatrix;
+	return *theMatrix;
 }
 
 const Matrix &OriHinge::getMass()
 {
-	Matrix KK = theMass;
+	Matrix &KK = *theMass;
 	KK.Zero();
-	return theMass;
+	return *theMass;
 }
 
 const Vector &OriHinge::getResistingForce()
 {
-	Vector F = theVector;
+	Vector &F = *theVector;
 	F.Zero();
 	double moment = getMoment(theta);
-	F = J * moment; // checks out
-	opserr << F << endln;
-	opserr << moment << endln;
-	opserr << J << endln;
-
-	return theVector;
+	Vector Ftemp = J * moment;
+	// Fill vector F
+	for (int i = 0; i < 4; i++)
+	{
+		F(i * ndof) = Ftemp(i * 3);
+		F(i * ndof + 1) = Ftemp(i * 3 + 1);
+		F(i * ndof + 2) = Ftemp(i * 3 + 2);
+		// The rest are zero
+	}
+	return *theVector;
 }
 
 const Vector &OriHinge::getResistingForceIncInertia()
 {
-	Vector F = theVector;
+	Vector &F = *theVector;
 	F.Zero();
 	double moment = getMoment(theta);
 	F = J * moment; // checks out
-	return theVector;
+	return *theVector;
 }
 
 void OriHinge::Print(OPS_Stream &s, int flag)
@@ -721,10 +723,10 @@ void OriHinge::Print(OPS_Stream &s, int flag)
 const Matrix &OriHinge::getDamp(void)
 {
 
-	Matrix K = theMatrix;
+	Matrix &K = *theMatrix;
 	K.Zero();
 
-	return theMatrix;
+	return *theMatrix;
 }
 void OriHinge::zeroLoad(void)
 {
