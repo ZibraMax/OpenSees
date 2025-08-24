@@ -14,7 +14,7 @@ class OriHinge : public Element
 {
 public:
   OriHinge(int tag, int node1,
-           int node2, int node3, int node4);
+           int node2, int node3, int node4, double pkf);
 
   OriHinge();
   ~OriHinge();
@@ -35,12 +35,14 @@ public:
   int revertToStart(void);
   int update(void);
   void calculateVectors(void);
-  float calculateTheta(void);
-  float calculateThetaFromU(void);
-  float getMoment(float theta);
+  double calculateTheta(void);
+  double calculateThetaFromU(void);
+  double getMoment(double theta);
   // Vector jacobian(void);
   Matrix dia(Vector a, Vector b);
   Matrix outer(Vector a, Vector b);
+  Vector cross(const Vector &a, const Vector &b);
+  double getKf(double ptheta);
 
   // public methods to obtain stiffness, mass, damping and residual information
   const Matrix &getTangentStiff(void);
@@ -58,7 +60,7 @@ public:
   // public methods for element output
   int sendSelf(int commitTag, Channel &theChannel);
   int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
-  // int displaySelf(Renderer &, int mode, float fact, const char **displayModes = 0, int numModes = 0);
+  // int displaySelf(Renderer &, int mode, double fact, const char **displayModes = 0, int numModes = 0);
   void Print(OPS_Stream &s, int flag = 0);
 
   Response *setResponse(const char **argv, int argc, OPS_Stream &s);
@@ -75,6 +77,7 @@ private:
   double theta;
   double theta1 = 0.0;
   double theta2 = 0.0;
+  double kf;
 
   static Vector theLoad;
   static Matrix theMass;
