@@ -80,12 +80,12 @@ private:
   double kf;
   int ndof;
   int total_dof;
-  static Vector theLoad;
+  Vector *theLoad;
   Matrix *theMass;
   Matrix *theMatrix;
   Vector *theVector;
-  static Vector J;
-  static Matrix d2thetadxi2;
+  Vector *J;
+  Matrix *d2thetadxi2;
 };
 
 #endif

@@ -16,9 +16,9 @@
 #include <cmath>
 #include <ElementResponse.h>
 
-Vector OriHinge::theLoad(12);
-Vector OriHinge::J(12);
-Matrix OriHinge::d2thetadxi2(12, 12);
+// Vector OriHinge::theLoad(12);
+// Vector OriHinge::J(12);
+// Matrix OriHinge::d2thetadxi2(12, 12);
 #include <elementAPI.h>
 
 #define OPS_Export
@@ -203,7 +203,7 @@ OPS_OriHingeElement(const ID &info)
 
 // ----- Constructores -----
 OriHinge::OriHinge()
-	: Element(0, ELE_TAG_OriHinge), connectedExternalNodes(4), theMatrix(0), theVector(0), theMass(0)
+	: Element(0, ELE_TAG_OriHinge), connectedExternalNodes(4), theMatrix(0), theVector(0), theMass(0), theLoad(0), J(0), d2thetadxi2(0)
 {
 	for (int i = 0; i < 4; i++)
 		theNodes[i] = 0;
@@ -217,7 +217,7 @@ OriHinge::OriHinge()
 }
 
 OriHinge::OriHinge(int tag, int node1, int node2, int node3, int node4, double pkf, double theta_1, double theta_2)
-	: Element(tag, ELE_TAG_OriHinge), connectedExternalNodes(4), theMatrix(0), theVector(0), theMass(0)
+	: Element(tag, ELE_TAG_OriHinge), connectedExternalNodes(4), theMatrix(0), theVector(0), theMass(0), theLoad(0), J(0), d2thetadxi2(0)
 {
 	connectedExternalNodes(0) = node1;
 	connectedExternalNodes(1) = node2;
@@ -233,13 +233,12 @@ OriHinge::OriHinge(int tag, int node1, int node2, int node3, int node4, double p
 	kf = pkf;
 	ndof = 6;
 	total_dof = ndof * 4;
-	Matrix K(total_dof, total_dof);
 	theMatrix = new Matrix(total_dof, total_dof);
 	theVector = new Vector(total_dof);
-	Matrix M(total_dof, total_dof);
-	Vector F(total_dof);
-	Vector J(12);
-	Matrix d2thetadxi2(12, 12);
+	theLoad = new Vector(total_dof);
+	theMass = new Matrix(total_dof, total_dof);
+	J = new Vector(total_dof);
+	d2thetadxi2 = new Matrix(total_dof, total_dof);
 }
 
 OriHinge::~OriHinge() {}
@@ -325,8 +324,8 @@ int OriHinge::update()
 
 void OriHinge::calculateVectors()
 {
-	J.Zero();
-	d2thetadxi2.Zero();
+	J->Zero();
+	d2thetadxi2->Zero();
 
 	Vector i = theNodes[0]->getCrds() + theNodes[0]->getTrialDisp();
 	Vector j = theNodes[1]->getCrds() + theNodes[1]->getTrialDisp();
@@ -437,40 +436,40 @@ void OriHinge::calculateVectors()
 
 		for (int c = 0; c < 3; c++)
 		{
-			d2thetadxi2(r, c) = d2tdxi2(r, c);
-			d2thetadxi2(r, c + 3) = d2tdxixj(r, c);
-			d2thetadxi2(r, c + 6) = d2tdxixk(r, c);
-			d2thetadxi2(r, c + 9) = d2tdxlxi(r, c);
+			(*d2thetadxi2)(r, c) = d2tdxi2(r, c);
+			(*d2thetadxi2)(r, c + 3) = d2tdxixj(r, c);
+			(*d2thetadxi2)(r, c + 6) = d2tdxixk(r, c);
+			(*d2thetadxi2)(r, c + 9) = d2tdxlxi(r, c);
 
-			d2thetadxi2(r + 3, c) = d2tdxixj(c, r);
-			d2thetadxi2(r + 3, c + 3) = d2tdxj2(r, c);
-			d2thetadxi2(r + 3, c + 6) = d2tdxjxk(r, c);
-			d2thetadxi2(r + 3, c + 9) = d2tdxlxj(c, r);
+			(*d2thetadxi2)(r + 3, c) = d2tdxixj(c, r);
+			(*d2thetadxi2)(r + 3, c + 3) = d2tdxj2(r, c);
+			(*d2thetadxi2)(r + 3, c + 6) = d2tdxjxk(r, c);
+			(*d2thetadxi2)(r + 3, c + 9) = d2tdxlxj(c, r);
 
-			d2thetadxi2(r + 6, c) = d2tdxixk(c, r);
-			d2thetadxi2(r + 6, c + 3) = d2tdxjxk(c, r);
-			d2thetadxi2(r + 6, c + 6) = d2tdxk2(r, c);
-			d2thetadxi2(r + 6, c + 9) = d2tdxlxk(c, r);
+			(*d2thetadxi2)(r + 6, c) = d2tdxixk(c, r);
+			(*d2thetadxi2)(r + 6, c + 3) = d2tdxjxk(c, r);
+			(*d2thetadxi2)(r + 6, c + 6) = d2tdxk2(r, c);
+			(*d2thetadxi2)(r + 6, c + 9) = d2tdxlxk(c, r);
 
-			d2thetadxi2(r + 9, c) = d2tdxlxi(c, r);
-			d2thetadxi2(r + 9, c + 3) = d2tdxlxj(r, c);
-			d2thetadxi2(r + 9, c + 6) = d2tdxlxk(r, c);
-			d2thetadxi2(r + 9, c + 9) = d2tdxl2(r, c);
+			(*d2thetadxi2)(r + 9, c) = d2tdxlxi(c, r);
+			(*d2thetadxi2)(r + 9, c + 3) = d2tdxlxj(r, c);
+			(*d2thetadxi2)(r + 9, c + 6) = d2tdxlxk(r, c);
+			(*d2thetadxi2)(r + 9, c + 9) = d2tdxl2(r, c);
 		}
 	}
 
-	J(0) = dtdxi(0);
-	J(1) = dtdxi(1);
-	J(2) = dtdxi(2);
-	J(3) = dtdxj(0);
-	J(4) = dtdxj(1);
-	J(5) = dtdxj(2);
-	J(6) = dtdxk(0);
-	J(7) = dtdxk(1);
-	J(8) = dtdxk(2);
-	J(9) = dtdxl(0);
-	J(10) = dtdxl(1);
-	J(11) = dtdxl(2);
+	(*J)(0) = dtdxi(0);
+	(*J)(1) = dtdxi(1);
+	(*J)(2) = dtdxi(2);
+	(*J)(3) = dtdxj(0);
+	(*J)(4) = dtdxj(1);
+	(*J)(5) = dtdxj(2);
+	(*J)(6) = dtdxk(0);
+	(*J)(7) = dtdxk(1);
+	(*J)(8) = dtdxk(2);
+	(*J)(9) = dtdxl(0);
+	(*J)(10) = dtdxl(1);
+	(*J)(11) = dtdxl(2);
 }
 
 Vector OriHinge::cross(const Vector &a, const Vector &b)
@@ -534,7 +533,7 @@ double OriHinge::calculateThetaFromU()
 		Ue(i * 3 + 1) = disp(1);
 		Ue(i * 3 + 2) = disp(2);
 	}
-	double r = theta0 + (J ^ Ue);
+	double r = theta0 + ((*J) ^ Ue);
 	r = fmod(r, (2.0 * PI));
 	if (r < 0)
 	{
@@ -623,8 +622,8 @@ const Matrix &OriHinge::getTangentStiff()
 	K.Zero();
 	double k = getKf(theta); // Rigidez muy alta
 	double moment = getMoment(theta);
-	Matrix kg = moment * d2thetadxi2;
-	Matrix ke = outer(J, J) * k;
+	Matrix kg = moment * (*d2thetadxi2);
+	Matrix ke = outer(*J, *J) * k;
 	Matrix kt = ke + kg;
 	for (int i = 0; i < 4; i++)
 	{
@@ -653,8 +652,8 @@ const Matrix &OriHinge::getInitialStiff()
 	K.Zero();
 	double k = getKf(theta); // Rigidez muy alta
 	double moment = getMoment(theta);
-	Matrix kg = moment * d2thetadxi2;
-	Matrix ke = outer(J, J) * k;
+	Matrix kg = moment * (*d2thetadxi2);
+	Matrix ke = outer(*J, *J) * k;
 	Matrix kt = ke + kg;
 	for (int i = 0; i < 4; i++)
 	{
@@ -689,7 +688,7 @@ const Vector &OriHinge::getResistingForce()
 	Vector &F = *theVector;
 	F.Zero();
 	double moment = getMoment(theta);
-	Vector Ftemp = J * moment;
+	Vector Ftemp = (*J) * moment;
 	for (int i = 0; i < 4; i++)
 	{
 		F(i * ndof) = Ftemp(i * 3);
@@ -704,7 +703,7 @@ const Vector &OriHinge::getResistingForceIncInertia()
 	Vector &F = *theVector;
 	F.Zero();
 	double moment = getMoment(theta);
-	Vector Ftemp = J * moment;
+	Vector Ftemp = (*J) * moment;
 	for (int i = 0; i < 4; i++)
 	{
 		F(i * ndof) = Ftemp(i * 3);
@@ -730,7 +729,7 @@ const Matrix &OriHinge::getDamp(void)
 }
 void OriHinge::zeroLoad(void)
 {
-	theLoad.Zero();
+	theLoad->Zero();
 }
 
 int OriHinge::addLoad(ElementalLoad *theLoad, double loadFactor)
