@@ -14,7 +14,7 @@ class OriHinge : public Element
 {
 public:
   OriHinge(int tag, int node1,
-           int node2, int node3, int node4, double pkf);
+           int node2, int node3, int node4, double pkf, double theta_1, double theta_2);
 
   OriHinge();
   ~OriHinge();
@@ -26,7 +26,7 @@ public:
   const ID &getExternalNodes(void);
   Node **getNodePtrs(void);
 
-  int getNumDOF(void) { return 24; } // 4 nodos × 6 GDL
+  int getNumDOF(void);
   void setDomain(Domain *theDomain);
 
   // public methods to set the state of the element
@@ -75,8 +75,8 @@ private:
   Node *theNodes[4];
   double theta0;
   double theta;
-  double theta1 = 0.0;
-  double theta2 = 0.0;
+  double theta_1;
+  double theta_2;
   double kf;
   int ndof;
   int total_dof;

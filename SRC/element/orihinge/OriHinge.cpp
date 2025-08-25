@@ -26,7 +26,7 @@ OPS_Export void *OPS_OriHingeElement()
 {
 	Element *theElement = 0;
 	int numRemainingArgs = OPS_GetNumRemainingInputArgs();
-	if (numRemainingArgs < 5)
+	if (numRemainingArgs < 8)
 	{
 		opserr << "ERROR: insufficient args for OriHinge element\n";
 		return 0;
@@ -49,13 +49,29 @@ OPS_Export void *OPS_OriHingeElement()
 		return 0;
 	}
 
+	double theta_1;
+	numArgs = 1;
+	if (OPS_GetDouble(&numArgs, &theta_1) != 0)
+	{
+		opserr << "WARNING invalid double theta_1 in element OriHinge " << endln;
+		return 0;
+	}
+
+	double theta_2;
+	numArgs = 1;
+	if (OPS_GetDouble(&numArgs, &theta_2) != 0)
+	{
+		opserr << "WARNING invalid double theta_2 in element OriHinge " << endln;
+		return 0;
+	}
+
 	tag = iData[0];
 	nd1 = iData[1];
 	nd2 = iData[2];
 	nd3 = iData[3];
 	nd4 = iData[4];
 
-	theElement = new OriHinge(tag, nd1, nd2, nd3, nd4, kf);
+	theElement = new OriHinge(tag, nd1, nd2, nd3, nd4, kf, theta_1, theta_2);
 	if (theElement == 0)
 	{
 		opserr << "WARNING: out of memory: element OriHinge " << iData[0] << " $iNode $jNode $A $matTag <-rho $rho> <-cMass $flag> <-doRayleigh $flag>\n";
@@ -79,13 +95,15 @@ OPS_OriHingeElement(const ID &info)
 	int nd3 = 0;
 	int nd4 = 0;
 	double kf = 0.0;
+	double theta_1 = 0.0;
+	double theta_2 = 0.0;
 
 	static std::map<int, Vector> meshdata;
 	if (info(0) == 1)
 	{
 
 		int numRemainingArgs = OPS_GetNumRemainingInputArgs();
-		if (numRemainingArgs < 5)
+		if (numRemainingArgs < 7)
 		{
 			opserr << "Invalid Args want: element OriHinge $A $matTag <-rho $rho> <-cMass $flag> <-doRayleigh $flag>\n";
 			return 0;
@@ -120,6 +138,18 @@ OPS_OriHingeElement(const ID &info)
 			opserr << "WARNING: Invalid kf: \n";
 			return 0;
 		}
+		numData = 6;
+		if (OPS_GetDouble(&numData, &theta_1) != 0)
+		{
+			opserr << "WARNING: Invalid theta_1: \n";
+			return 0;
+		}
+		numData = 7;
+		if (OPS_GetDouble(&numData, &theta_2) != 0)
+		{
+			opserr << "WARNING: Invalid theta_2: \n";
+			return 0;
+		}
 
 		if (info.Size() < 2)
 		{
@@ -129,25 +159,27 @@ OPS_OriHingeElement(const ID &info)
 
 		// save the data for a mesh
 		Vector &mdata = meshdata[info(1)];
-		mdata.resize(5);
+		mdata.resize(7);
 		mdata(0) = (double)nd1;
 		mdata(1) = (double)nd1;
 		mdata(2) = (double)nd3;
 		mdata(3) = (double)nd4;
 		mdata(4) = (double)kf;
+		mdata(5) = (double)theta_1;
+		mdata(6) = (double)theta_2;
 		return &meshdata;
 	}
 	else if (info(0) == 2)
 	{
 
-		if (info.Size() < 7)
+		if (info.Size() < 10)
 		{
-			opserr << "WARNING: need info -- inmesh, meshtag, eleTag, nd1, nd2\n";
+			opserr << "WARNING: need info -- inmesh, meshtag, eleTag, nd1, nd2, nd3, nd4, kf, theta_1, theta_2\n";
 			return 0;
 		}
 
 		Vector &mdata = meshdata[info(1)];
-		if (mdata.Size() < 5)
+		if (mdata.Size() < 7)
 			return 0;
 
 		iData[0] = info(2);
@@ -156,8 +188,10 @@ OPS_OriHingeElement(const ID &info)
 		iData[3] = info(5);
 		iData[4] = info(6);
 		kf = info(7);
+		theta_1 = info(8);
+		theta_2 = info(9);
 	}
-	theElement = new OriHinge(iData[0], iData[1], iData[2], iData[3], iData[4], kf);
+	theElement = new OriHinge(iData[0], iData[1], iData[2], iData[3], iData[4], kf, theta_1, theta_2);
 
 	if (theElement == 0)
 	{
@@ -175,12 +209,14 @@ OriHinge::OriHinge()
 		theNodes[i] = 0;
 	theta0 = 0.0;
 	theta = 0.0;
+	theta_1 = 0.0;
+	theta_2 = 0.0;
 	kf = 0.0;
 	ndof = 0;
 	total_dof = 0;
 }
 
-OriHinge::OriHinge(int tag, int node1, int node2, int node3, int node4, double pkf)
+OriHinge::OriHinge(int tag, int node1, int node2, int node3, int node4, double pkf, double theta_1, double theta_2)
 	: Element(tag, ELE_TAG_OriHinge), connectedExternalNodes(4), theMatrix(0), theVector(0), theMass(0)
 {
 	connectedExternalNodes(0) = node1;
@@ -192,6 +228,8 @@ OriHinge::OriHinge(int tag, int node1, int node2, int node3, int node4, double p
 		theNodes[i] = 0;
 	theta0 = 0.0;
 	theta = 0.0;
+	this->theta_1 = theta_1;
+	this->theta_2 = theta_2;
 	kf = pkf;
 	ndof = 6;
 	total_dof = ndof * 4;
@@ -246,6 +284,11 @@ void OriHinge::setDomain(Domain *theDomain)
 	calculateVectors();
 	theta0 = calculateTheta();
 	theta = calculateTheta();
+}
+
+int OriHinge::getNumDOF(void)
+{
+	return total_dof;
 }
 
 int OriHinge::commitState()
@@ -507,7 +550,27 @@ double OriHinge::getMoment(double ptheta)
 	Vector k = theNodes[2]->getCrds() + theNodes[2]->getTrialDisp();
 	Vector rkj = k - j;
 	Lr = rkj.Norm();
-	return Lr * kf * (ptheta - theta0);
+	double moment = 0.0;
+	if (0.0 < ptheta && ptheta < theta_1)
+	{
+		moment = Lr * kf * (theta_1 - theta0) + (2.0 * kf * theta_1 / PI) *
+													tan(PI * (ptheta - theta_1) / (2.0 * theta_1));
+	}
+	else if (theta_1 <= ptheta && ptheta <= theta_2)
+	{
+		moment = Lr * kf * (ptheta - theta0);
+	}
+	else if (theta_2 < ptheta && ptheta < 2.0 * PI)
+	{
+		moment = Lr * kf * (theta_2 - theta0) + (2.0 * kf * (2.0 * PI - theta_2) / PI) *
+													tan(PI * (ptheta - theta_2) / (4.0 * PI - 2.0 * theta_2));
+	}
+	else
+	{
+		opserr << "OriHinge::getMoment() - theta out of range: " << ptheta << endln;
+		return 0.0;
+	}
+	return moment;
 }
 
 double OriHinge::getKf(double ptheta)
@@ -517,7 +580,26 @@ double OriHinge::getKf(double ptheta)
 	Vector k = theNodes[2]->getCrds() + theNodes[2]->getTrialDisp();
 	Vector rkj = k - j;
 	Lr = rkj.Norm();
-	return Lr * kf;
+	double kk = Lr * kf;
+	if (0.0 < ptheta && ptheta < theta_1)
+	{
+		kk = Lr * kf * (1.0 / (cos(PI * (ptheta - theta_1) / (2.0 * theta_1)) * cos(PI * (ptheta - theta_1) / (2.0 * theta_1))));
+	}
+	else if (theta_1 <= ptheta && ptheta <= theta_2)
+	{
+		kk = Lr * kf;
+	}
+	else if (theta_2 < ptheta && ptheta < 2.0 * PI)
+	{
+		kk = Lr * kf * (1.0 / (cos(PI * (ptheta - theta_2) / (4.0 * PI - 2.0 * theta_2)) * cos(PI * (ptheta - theta_2) / (4.0 * PI - 2.0 * theta_2))));
+	}
+	else
+	{
+		opserr << "OriHinge::getKf() - theta out of range: " << ptheta << endln;
+		return 0.0;
+	}
+
+	return kk;
 }
 
 Matrix OriHinge::outer(Vector a, Vector b)
