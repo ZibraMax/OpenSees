@@ -219,7 +219,6 @@ Node **OriHinge::getNodePtrs()
 
 void OriHinge::setDomain(Domain *theDomain)
 {
-	opserr << "Entra a domain\n";
 	if (theDomain == 0)
 	{
 		opserr << "OriHinge::setDomain - theDomain is null\n";
@@ -291,15 +290,6 @@ void OriHinge::calculateVectors()
 	Vector k = theNodes[2]->getCrds() + theNodes[2]->getTrialDisp();
 	Vector l = theNodes[3]->getCrds() + theNodes[3]->getTrialDisp();
 
-	// opserr << "Calculate vectors!" << endln;
-
-	// Imprimir trial displacements
-
-	// opserr << "Node 1 trial disp: " << theNodes[0]->getTrialDisp() << endln;
-	// opserr << "Node 2 trial disp: " << theNodes[1]->getTrialDisp() << endln;
-	// opserr << "Node 3 trial disp: " << theNodes[2]->getTrialDisp() << endln;
-	// opserr << "Node 4 trial disp: " << theNodes[3]->getTrialDisp() << endln;
-
 	Vector rij = i - j;
 	Vector rkj = k - j;
 	Vector rkl = k - l;
@@ -334,18 +324,6 @@ void OriHinge::calculateVectors()
 	// B = rkl@rkj/self.rkj_n**2
 	double B = (rkl ^ rkj) / (rkj_n * rkj_n);
 
-	// opserr << todas las cantidades previamente calculadas
-	// opserr << "rij: " << rij << endln;
-	// opserr << "rkj: " << rkj << endln;
-	// opserr << "rkl: " << rkl << endln;
-	// opserr << "rij_n: " << rij_n << endln;
-	// opserr << "rkj_n: " << rkj_n << endln;
-	// opserr << "rkl_n: " << rkl_n << endln;
-	// opserr << "m: " << m << endln;
-	// opserr << "n: " << n << endln;
-	// opserr << "A: " << A << endln;
-	// opserr << "B: " << B << endln;
-
 	// dA_dxj = (1 / rkj_n**2) *  ((2 * A - 1) * rkj - rij)
 	Vector dA_dxj = (1.0 / (rkj_n * rkj_n)) * ((2.0 * A - 1.0) * rkj - rij);
 	// dB_dxj = (1 / rkj_n**2) * (2 * B * rkj - rkl)
@@ -354,11 +332,6 @@ void OriHinge::calculateVectors()
 	Vector dA_dxk = (1.0 / (rkj_n * rkj_n)) * (-2.0 * A * rkj + rij);
 	// self.dB_dxk = (1 / self.rkj_n**2) * ((1 - 2 * self.B) * self.rkj + self.rkl)
 	Vector dB_dxk = (1.0 / (rkj_n * rkj_n)) * ((1.0 - 2.0 * B) * rkj + rkl);
-
-	// opserr << "dA_dxj: " << dA_dxj << endln;
-	// opserr << "dB_dxj: " << dB_dxj << endln;
-	// opserr << "dA_dxk: " << dA_dxk << endln;
-	// opserr << "dB_dxk: " << dB_dxk << endln;
 
 	// self.dtdxi = (self.rkj_n/self.m_n2) * self.m
 	Vector dtdxi = (rkj_n / m_n2) * m;
@@ -369,67 +342,44 @@ void OriHinge::calculateVectors()
 	// self.dtdxk = (np.dot(self.rkl, self.rkj)/self.rkj_n**2-1)*self.dtdxl - np.dot(self.rij, self.rkj)/self.rkj_n**2 * self.dtdxi
 	Vector dtdxk = (B - 1.0) * dtdxl - A * dtdxi;
 
-	// opserr << "dtdxi: " << dtdxi << endln;
-	// opserr << "dtdxl: " << dtdxl << endln;
-	// opserr << "dtdxj: " << dtdxj << endln;
-	// opserr << "dtdxk: " << dtdxk << endln;
-
 	// cross_product = np.cross(self.rkj, self.m)
 	//  d2tdxi2 = -(self.rkj_n / (self.m_n2**2)) * self.dia(self.m, cross_product)  # yes
 	Vector cross_product = cross(rkj, m);
 	Matrix d2tdxi2 = -(rkj_n / (m_n2 * m_n2)) * dia(m, cross_product);
-
-	// opserr << "d2tdxi2: " << d2tdxi2 << endln;
 
 	// cross_product_n = np.cross(self.rkj, self.n)
 	// d2tdxl2 = (self.rkj_n / (self.n_n2**2)) * self.dia(self.n, cross_product_n)  # yes
 	cross_product = cross(rkj, n);
 	Matrix d2tdxl2 = (rkj_n / (n_n2 * n_n2)) * dia(n, cross_product);
 
-	// opserr << "d2tdxl2: " << d2tdxl2 << endln;
-
 	// cross_product_m_rij = np.cross(self.rij, self.m)
 	// d2tdxixk = (np.outer(self.m, self.rkj) / (self.m_n2 * self.rkj_n)) + (self.rkj_n / (self.m_n2**2)) * self.dia(self.m, cross_product_m_rij)  # yes
 	cross_product = cross(rij, m);
 	Matrix d2tdxixk = (outer(m, rkj) / (m_n2 * rkj_n)) + (rkj_n / (m_n2 * m_n2)) * dia(m, cross_product);
-
-	// opserr << "d2tdxixk: " << d2tdxixk << endln;
 
 	// cross_product_n_rkl = np.cross(self.rkl, self.n)
 	// d2tdxlxj = (np.outer(self.n, self.rkj) / (self.n_n2 * self.rkj_n)) - (self.rkj_n / (self.n_n2**2)) * self.dia(self.n, cross_product_n_rkl)  # yes
 	cross_product = cross(rkl, n);
 	Matrix d2tdxlxj = (outer(n, rkj) / (n_n2 * rkj_n)) - (rkj_n / (n_n2 * n_n2)) * dia(n, cross_product);
 
-	// opserr << "d2tdxlxj: " << d2tdxlxj << endln;
-
 	// cross_product_m_diff = np.cross(self.rkj - self.rij, self.m)
 	// d2tdxixj = -(np.outer(self.m, self.rkj) / (self.m_n2 * self.rkj_n)) + (self.rkj_n / (self.m_n2**2)) * self.dia(self.m, cross_product_m_diff)  # yes
 	cross_product = cross(rkj - rij, m);
 	Matrix d2tdxixj = -1.0 * (outer(m, rkj) / (m_n2 * rkj_n)) + (rkj_n / (m_n2 * m_n2)) * dia(m, cross_product);
-
-	// opserr << "d2tdxixj: " << d2tdxixj << endln;
 
 	// cross_product_n_diff = np.cross(self.rkj - self.rkl, self.n)
 	// d2tdxlxk = -(np.outer(self.n, self.rkj) / (self.n_n2 * self.rkj_n)) - (self.rkj_n / (self.n_n2**2)) * self.dia(self.n, cross_product_n_diff)  # yes
 	cross_product = cross(rkj - rkl, n);
 	Matrix d2tdxlxk = -1.0 * (outer(n, rkj) / (n_n2 * rkj_n)) - (rkj_n / (n_n2 * n_n2)) * dia(n, cross_product);
 
-	// opserr << "d2tdxlxk: " << d2tdxlxk << endln;
-
 	// d2tdxj2 = np.outer(self.dtdxi, self.dA_dxj) + (self.A - 1) * d2tdxixj - (np.outer(self.dtdxl, self.dB_dxj) + self.B * d2tdxlxj)
 	Matrix d2tdxj2 = outer(dtdxi, dA_dxj) + (A - 1.0) * d2tdxixj - (outer(dtdxl, dB_dxj) + B * d2tdxlxj);
-
-	// opserr << "d2tdxj2: " << d2tdxj2 << endln;
 
 	// d2tdxjxk = np.outer(self.dtdxi, self.dA_dxk) + (self.A - 1) * d2tdxixk - (np.outer(self.dtdxl, self.dB_dxk) + self.B * d2tdxlxk)
 	Matrix d2tdxjxk = outer(dtdxi, dA_dxk) + (A - 1.0) * d2tdxixk - (outer(dtdxl, dB_dxk) + B * d2tdxlxk);
 
-	// opserr << "d2tdxjxk: " << d2tdxjxk << endln;
-
 	// d2tdxk2 = np.outer(self.dtdxl, self.dB_dxk) + (self.B - 1) * d2tdxlxk - (np.outer(self.dtdxi, self.dA_dxk) + self.A * d2tdxixk)
 	Matrix d2tdxk2 = outer(dtdxl, dB_dxk) + (B - 1.0) * d2tdxlxk - (outer(dtdxi, dA_dxk) + A * d2tdxixk);
-
-	// opserr << "d2tdxk2: " << d2tdxk2 << endln;
 
 	// d2tdxlxi = np.zeros((3, 3))
 	Matrix d2tdxlxi(3, 3);
@@ -466,10 +416,6 @@ void OriHinge::calculateVectors()
 		}
 	}
 
-	// opserr << "d2thetadxi2: " << d2thetadxi2 << endln;
-
-	// J = np.array( [self.dtdxi, self.dtdxj, self.dtdxk, self.dtdxl])
-
 	J(0) = dtdxi(0);
 	J(1) = dtdxi(1);
 	J(2) = dtdxi(2);
@@ -482,8 +428,6 @@ void OriHinge::calculateVectors()
 	J(9) = dtdxl(0);
 	J(10) = dtdxl(1);
 	J(11) = dtdxl(2);
-
-	// opserr << "J: " << J << endln;
 }
 
 Vector OriHinge::cross(const Vector &a, const Vector &b)
@@ -504,17 +448,6 @@ Vector OriHinge::cross(const Vector &a, const Vector &b)
 
 double OriHinge::calculateTheta()
 {
-	// eta = 1
-	//  if round(np.dot(self.m, self.rkl), 8) != 0:
-	//      eta = np.sign(np.dot(self.m, self.rkl))
-	//  cosa  = np.dot(self.m, self.n) / \
-	//     (np.linalg.norm(self.m)*np.linalg.norm(self.n))
-	//  cosa = max(min(cosa, 1), -1)
-	//  theta_ = eta*np.arccos(cosa)
-	//  theta_ = theta_ % (2*np.pi)
-
-	// return theta_
-	// Ahora en C++
 
 	double eta = 1.0;
 	Vector i = theNodes[0]->getCrds() + theNodes[0]->getTrialDisp();
@@ -550,13 +483,6 @@ double OriHinge::calculateTheta()
 
 double OriHinge::calculateThetaFromU()
 {
-
-	// Ue = self.Ue.T.flatten().reshape([12, 1])
-	// J = self.jacobian().flatten().reshape([12, 1])
-	// r = self.theta_0 + J.T@Ue
-	// r = r % (2*np.pi)
-
-	// return r
 	Vector Ue(12);
 	for (int i = 0; i < 4; i++)
 	{
@@ -577,7 +503,6 @@ double OriHinge::calculateThetaFromU()
 double OriHinge::getMoment(double ptheta)
 {
 	double Lr = 0.0;
-	// Calcular Lr como norma de rkj
 	Vector j = theNodes[1]->getCrds() + theNodes[1]->getTrialDisp();
 	Vector k = theNodes[2]->getCrds() + theNodes[2]->getTrialDisp();
 	Vector rkj = k - j;
@@ -594,14 +519,6 @@ double OriHinge::getKf(double ptheta)
 	Lr = rkj.Norm();
 	return Lr * kf;
 }
-
-// Vector OriHinge::jacobian()
-// {
-// 	// Calcular la matriz jacobiana
-// 	Vector J(12);
-// 	J.Zero();
-// 	return J;
-// }
 
 Matrix OriHinge::outer(Vector a, Vector b)
 {
@@ -620,14 +537,10 @@ Matrix OriHinge::dia(Vector a, Vector b)
 
 const Matrix &OriHinge::getTangentStiff()
 {
-	// opserr << "Entra a la matrix tangete\n";
-	// opserr << "Theta " << theta * 180.0 / PI << endln;
-	// opserr << "Theta_0 " << theta0 * 180.0 / PI << endln;
 	Matrix &K = *theMatrix;
 	K.Zero();
 	double k = getKf(theta); // Rigidez muy alta
 	double moment = getMoment(theta);
-	// opserr << "M " << moment << endln;
 	Matrix kg = moment * d2thetadxi2;
 	Matrix ke = outer(J, J) * k;
 	Matrix kt = ke + kg;
@@ -649,32 +562,33 @@ const Matrix &OriHinge::getTangentStiff()
 		}
 	}
 
-	// opserr << "K: " << K << endln;
-
 	return *theMatrix;
 }
 
 const Matrix &OriHinge::getInitialStiff()
 {
 	Matrix &K = *theMatrix;
+	K.Zero();
 	double k = getKf(theta); // Rigidez muy alta
 	double moment = getMoment(theta);
 	Matrix kg = moment * d2thetadxi2;
+	Matrix ke = outer(J, J) * k;
+	Matrix kt = ke + kg;
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			K(i * ndof, j * ndof) = k * J(i * 3) * J(j * 3) + kg(i * 3, j * 3);
-			K(i * ndof, j * ndof + 1) = k * J(i * 3) * J(j * 3 + 1) + kg(i * 3, j * 3 + 1);
-			K(i * ndof, j * ndof + 2) = k * J(i * 3) * J(j * 3 + 2) + kg(i * 3, j * 3 + 2);
+			K(i * ndof, j * ndof) = kt(i * 3, j * 3);
+			K(i * ndof, j * ndof + 1) = kt(i * 3, j * 3 + 1);
+			K(i * ndof, j * ndof + 2) = kt(i * 3, j * 3 + 2);
 
-			K(i * ndof + 1, j * ndof) = k * J(i * 3 + 1) * J(j * 3) + kg(i * 3 + 1, j * 3);
-			K(i * ndof + 1, j * ndof + 1) = k * J(i * 3 + 1) * J(j * 3 + 1) + kg(i * 3 + 1, j * 3 + 1);
-			K(i * ndof + 1, j * ndof + 2) = k * J(i * 3 + 1) * J(j * 3 + 2) + kg(i * 3 + 1, j * 3 + 2);
+			K(i * ndof + 1, j * ndof) = kt(i * 3 + 1, j * 3);
+			K(i * ndof + 1, j * ndof + 1) = kt(i * 3 + 1, j * 3 + 1);
+			K(i * ndof + 1, j * ndof + 2) = kt(i * 3 + 1, j * 3 + 2);
 
-			K(i * ndof + 2, j * ndof) = k * J(i * 3 + 2) * J(j * 3) + kg(i * 3 + 2, j * 3);
-			K(i * ndof + 2, j * ndof + 1) = k * J(i * 3 + 2) * J(j * 3 + 1) + kg(i * 3 + 2, j * 3 + 1);
-			K(i * ndof + 2, j * ndof + 2) = k * J(i * 3 + 2) * J(j * 3 + 2) + kg(i * 3 + 2, j * 3 + 2);
+			K(i * ndof + 2, j * ndof) = kt(i * 3 + 2, j * 3);
+			K(i * ndof + 2, j * ndof + 1) = kt(i * 3 + 2, j * 3 + 1);
+			K(i * ndof + 2, j * ndof + 2) = kt(i * 3 + 2, j * 3 + 2);
 		}
 	}
 
@@ -694,13 +608,11 @@ const Vector &OriHinge::getResistingForce()
 	F.Zero();
 	double moment = getMoment(theta);
 	Vector Ftemp = J * moment;
-	// Fill vector F
 	for (int i = 0; i < 4; i++)
 	{
 		F(i * ndof) = Ftemp(i * 3);
 		F(i * ndof + 1) = Ftemp(i * 3 + 1);
 		F(i * ndof + 2) = Ftemp(i * 3 + 2);
-		// The rest are zero
 	}
 	return *theVector;
 }
@@ -710,7 +622,13 @@ const Vector &OriHinge::getResistingForceIncInertia()
 	Vector &F = *theVector;
 	F.Zero();
 	double moment = getMoment(theta);
-	F = J * moment; // checks out
+	Vector Ftemp = J * moment;
+	for (int i = 0; i < 4; i++)
+	{
+		F(i * ndof) = Ftemp(i * 3);
+		F(i * ndof + 1) = Ftemp(i * 3 + 1);
+		F(i * ndof + 2) = Ftemp(i * 3 + 2);
+	}
 	return *theVector;
 }
 
@@ -758,15 +676,41 @@ OriHinge::setResponse(const char **argv, int argc, OPS_Stream &output)
 	output.attr("node2", connectedExternalNodes[1]);
 	output.attr("node3", connectedExternalNodes[2]);
 	output.attr("node4", connectedExternalNodes[3]);
+	if (strcmp(argv[0], "theta") == 0)
+	{
+		theResponse = new ElementResponse(this, 1, 0.0);
+		output.tag("ResponseType", "theta");
+	}
+	else if (strcmp(argv[0], "moment") == 0)
+	{
+		theResponse = new ElementResponse(this, 2, 0.0);
+		output.tag("ResponseType", "moment");
+	}
+	else if (strcmp(argv[0], "stiffness") == 0)
+	{
+		theResponse = new ElementResponse(this, 3, 0.0);
+		output.tag("ResponseType", "stiffness");
+	}
+
 	output.endTag();
 	return theResponse;
 }
 
 int OriHinge::getResponse(int responseID, Information &eleInfo)
 {
-	double strain;
+	switch (responseID)
+	{
+	case 1:
+		return eleInfo.setDouble(this->theta);
 
-	return 0;
+	case 2:
+		return eleInfo.setDouble(getMoment(theta));
+
+	case 3:
+		return eleInfo.setDouble(getKf(theta));
+	default:
+		return 0;
+	}
 }
 int OriHinge::setParameter(const char **argv, int argc, Parameter &param)
 {
