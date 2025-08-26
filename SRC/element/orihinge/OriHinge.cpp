@@ -237,8 +237,8 @@ OriHinge::OriHinge(int tag, int node1, int node2, int node3, int node4, double p
 	theVector = new Vector(total_dof);
 	theLoad = new Vector(total_dof);
 	theMass = new Matrix(total_dof, total_dof);
-	J = new Vector(total_dof);
-	d2thetadxi2 = new Matrix(total_dof, total_dof);
+	J = new Vector(12);
+	d2thetadxi2 = new Matrix(12, 12);
 }
 
 OriHinge::~OriHinge() {}
