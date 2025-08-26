@@ -318,7 +318,8 @@ int OriHinge::revertToStart()
 int OriHinge::update()
 {
 	calculateVectors();
-	theta = calculateThetaFromU();
+	// theta = calculateThetaFromU();
+	theta = calculateTheta();
 	return 0;
 }
 
