@@ -57,8 +57,6 @@ source /opt/intel/oneapi/setvars.sh
 
 
 # Clonar el repo OpenSees de ZibraMax
-git clone https://github.com/ZibraMax/OpenSees
-cd OpenSees
 
 
 
