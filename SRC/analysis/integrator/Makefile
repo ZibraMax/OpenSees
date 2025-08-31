@@ -9,6 +9,7 @@ OBJS       = AlphaOS.o \
     ExplicitDifference.o \
 	AlphaOSGeneralized_TP.o \
 	ArcLength.o \
+	MGDCM.o \
 	ArcLength1.o \
 	BackwardEuler.o \
 	CentralDifference.o \

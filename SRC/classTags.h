@@ -1035,6 +1035,7 @@
 #define INTEGRATOR_TAGS_LoadControl 6
 #define INTEGRATOR_TAGS_DisplacementControl 7
 #define INTEGRATOR_TAGS_ArcLength 8
+#define INTEGRATOR_TAGS_MGDCM 1111
 #define INTEGRATOR_TAGS_LoadPath 9
 #define INTEGRATOR_TAGS_Newmark1 10
 #define INTEGRATOR_TAGS_HHT1 11

@@ -11,17 +11,19 @@
 // used by programmers when introducing new subclasses of the main objects.
 //
 #ifdef _PARALLEL_PROCESSING
-#  include <mpi.h>
+#include <mpi.h>
 #endif
 
 #ifdef _PARALLEL_INTERPRETERS
-#  include <mpi.h>
+#include <mpi.h>
 #endif
 
 #include <Hash.h>
 using namespace OpenSees::Hash;
 using namespace OpenSees::Hash::literals;
-#define DISPATCH(symbol) case  hasher<std::string>()(#symbol): return new symbol();
+#define DISPATCH(symbol)               \
+  case hasher<std::string>()(#symbol): \
+    return new symbol();
 //
 // case hasher<std::string>()(Truss::class_name):  return new Truss();
 //
@@ -124,9 +126,9 @@ using namespace OpenSees::Hash::literals;
 #include "ElasticShearSection2d.h"
 #include "ElasticShearSection3d.h"
 #include "GenericSection1d.h"
-//#include "GenericSectionNd.h"
+// #include "GenericSectionNd.h"
 #include "SectionAggregator.h"
-//#include "FiberSection.h"
+// #include "FiberSection.h"
 #include "FiberSection2d.h"
 #include "FiberSection3d.h"
 #include "FiberSectionAsym3d.h" //Xinlong Du
@@ -152,7 +154,7 @@ using namespace OpenSees::Hash::literals;
 // start Yuli Huang & Xinzheng L
 #include "PlateRebarMaterial.h"
 #include "PlateFromPlaneStressMaterial.h"
-//#include "ConcreteS.h"
+// #include "ConcreteS.h"
 #include "PlaneStressUserMaterial.h"
 // end Yuli Huang & Xinzheng Lu
 #include "feap/FeapMaterial03.h"
@@ -205,7 +207,7 @@ using namespace OpenSees::Hash::literals;
 #include "Point/ZeroLengthContactNTS2D.h"
 #include "Point/ZeroLengthInterface2D.h"
 #include "Point/ZeroLengthContactASDimplex.h"
-//#include "ZeroLengthND.h"
+// #include "ZeroLengthND.h"
 
 #include "Plane/FourNodeQuad.h"
 #include "Plane/EnhancedQuad.h"
@@ -228,9 +230,8 @@ using namespace OpenSees::Hash::literals;
 #include "Frame/Other/Force/ForceBeamColumn3d.h"
 #include "Frame/Other/Displ/DispBeamColumn2d.h"
 #include "Frame/Other/Displ/DispBeamColumn3d.h"
-#include "Frame/Other/Displ/DispBeamColumnAsym3d.h"   // Xinlong Du
-#include "Frame/Other/Mixed/MixedBeamColumnAsym3d.h"  // Xinlong Du
-
+#include "Frame/Other/Displ/DispBeamColumnAsym3d.h"  // Xinlong Du
+#include "Frame/Other/Mixed/MixedBeamColumnAsym3d.h" // Xinlong Du
 
 #include "UWelements/SSPquad.h"
 #include "UWelements/SSPquadUP.h"
@@ -285,7 +286,6 @@ using namespace OpenSees::Hash::literals;
 #include "Bearing/friction/frictionModel/VelPressureDep.h"
 #include "Bearing/friction/frictionModel/VelDepMultiLinear.h"
 #include "Bearing/friction/frictionModel/VelNormalFrcDep.h"
-
 
 #include "mvlem/MVLEM.h"        // Kristijan Kolozvari
 #include "mvlem/SFI_MVLEM.h"    // Kristijan Kolozvari
@@ -344,14 +344,13 @@ using namespace OpenSees::Hash::literals;
 #include "EnvelopeNodeRecorder.h"
 #include "EnvelopeElementRecorder.h"
 #include "DriftRecorder.h"
-//#include "MPCORecorder.h"
+// #include "MPCORecorder.h"
 #include "VTK_Recorder.h"
 #include "GmshRecorder.h"
 
 #ifdef _H5DRM
 #include "VTKHDF_Recorder.h"
 #endif
-
 
 // mp_constraint header files
 #include "MP_Constraint.h"
@@ -487,11 +486,11 @@ using namespace OpenSees::Hash::literals;
 #include "GroundMotion.h"
 #include "InterpolatedGroundMotion.h"
 #ifdef OPSDEF_DRM
-#  include "drm/DRMLoadPatternWrapper.h"
+#include "drm/DRMLoadPatternWrapper.h"
 #endif // OPSDEF_DRM
 
 #ifdef _H5DRM
-#  include "drm/H5DRM.h"
+#include "drm/H5DRM.h"
 #endif
 
 #include "Parameter.h"
@@ -516,33 +515,33 @@ using namespace OpenSees::Hash::literals;
 #include "eigenSOE/ArpackSOE.h"
 
 #ifdef _PETSC
-#  include "PetscSOE.h"
-#  include "PetscSolver.h"
-#  include "SparseGenColLinSOE.h"
+#include "PetscSOE.h"
+#include "PetscSolver.h"
+#include "SparseGenColLinSOE.h"
 #endif
 
 #ifdef _MUMPS
-#  include "MumpsSOE.h"
-#  ifdef _PARALLEL_PROCESSING
-#  include "MumpsParallelSOE.h"
-#  endif
+#include "MumpsSOE.h"
+#ifdef _PARALLEL_PROCESSING
+#include "MumpsParallelSOE.h"
+#endif
 #endif
 
 #ifdef _PARALLEL_PROCESSING
-#  include "DistributedBandSPDLinSOE.h"
-#  include "DistributedProfileSPDLinSOE.h"
-#  include "DistributedSparseGenColLinSOE.h"
-#  include "DistributedSparseGenRowLinSOE.h"
-#  include "DistributedBandGenLinSOE.h"
-#  include "DistributedSuperLU.h"
-#  include "ParallelNumberer.h"
-#  include "StaticDomainDecompositionAnalysis.h"
-#  include "TransientDomainDecompositionAnalysis.h"
-#  include "DistributedDiagonalSOE.h"
+#include "DistributedBandSPDLinSOE.h"
+#include "DistributedProfileSPDLinSOE.h"
+#include "DistributedSparseGenColLinSOE.h"
+#include "DistributedSparseGenRowLinSOE.h"
+#include "DistributedBandGenLinSOE.h"
+#include "DistributedSuperLU.h"
+#include "ParallelNumberer.h"
+#include "StaticDomainDecompositionAnalysis.h"
+#include "TransientDomainDecompositionAnalysis.h"
+#include "DistributedDiagonalSOE.h"
 #endif
 
-
-typedef struct uniaxialPackage {
+typedef struct uniaxialPackage
+{
   int classTag;
   char *libName;
   char *funcName;
@@ -559,7 +558,8 @@ TclPackageClassBroker::~TclPackageClassBroker() {}
 Actor *
 TclPackageClassBroker::getNewActor(int classTag, Channel *theChannel)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
 
 #ifdef _PARALLEL_PROCESSING
   case ACTOR_TAGS_SUBDOMAIN:
@@ -578,7 +578,8 @@ PartitionedModelBuilder *
 TclPackageClassBroker::getPtrNewPartitionedModelBuilder(Subdomain &theSubdomain,
                                                         int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
     /*
     case PartitionedModelBuilder_TAGS_PartitionedQuick2dFrameModel:
          return new PartitionedQuick2dFrame(theSubdomain);
@@ -595,7 +596,8 @@ TclPackageClassBroker::getPtrNewPartitionedModelBuilder(Subdomain &theSubdomain,
 GraphNumberer *
 TclPackageClassBroker::getPtrNewGraphNumberer(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case GraphNUMBERER_TAG_RCM:
     return new RCM();
 
@@ -619,7 +621,8 @@ TclPackageClassBroker::getPtrNewGraphNumberer(int classTag)
 Element *
 TclPackageClassBroker::getNewElement(int classTag)
 {
-  switch ((std::size_t)classTag) {
+  switch ((std::size_t)classTag)
+  {
 
     DISPATCH(Truss);
     DISPATCH(Truss2);
@@ -647,7 +650,7 @@ TclPackageClassBroker::getNewElement(int classTag)
     DISPATCH(DispBeamColumnAsym3d);
     DISPATCH(MixedBeamColumnAsym3d);
 
-// Quads
+    // Quads
     DISPATCH(EnhancedQuad);
     DISPATCH(NineNodeMixedQuad);
     DISPATCH(NineNodeQuad);
@@ -669,14 +672,14 @@ TclPackageClassBroker::getNewElement(int classTag)
 
     DISPATCH(PML3D);
 
-// Bricks
+    // Bricks
     DISPATCH(Brick);
     DISPATCH(BbarBrick);
     DISPATCH(BBarBrickUP);
     DISPATCH(BrickUP);
     DISPATCH(TwentyEightNodeBrickUP);
 
-// Shells
+    // Shells
     DISPATCH(ShellMITC4);
     DISPATCH(ShellMITC9);
     DISPATCH(ShellDKGQ);
@@ -701,18 +704,15 @@ TclPackageClassBroker::getNewElement(int classTag)
     DISPATCH(ZeroLengthContactNTS2D);
     DISPATCH(ZeroLengthContactASDimplex);
 
-
-
     DISPATCH(Joint2D); // Arash
     DISPATCH(TwoNodeLink);
     DISPATCH(LinearElasticSpring);
     DISPATCH(Inerter);
 
-    DISPATCH(MVLEM); // Kristijan Kolozvari
-    DISPATCH(SFI_MVLEM); // Kristijan Kolozvari
-    DISPATCH(MVLEM_3D); // Kristijan Kolozvari
+    DISPATCH(MVLEM);        // Kristijan Kolozvari
+    DISPATCH(SFI_MVLEM);    // Kristijan Kolozvari
+    DISPATCH(MVLEM_3D);     // Kristijan Kolozvari
     DISPATCH(SFI_MVLEM_3D); // Kristijan Kolozvari
-
 
     DISPATCH(ElastomericBearingBoucWen2d);
     DISPATCH(ElastomericBearingBoucWen3d);
@@ -731,7 +731,6 @@ TclPackageClassBroker::getNewElement(int classTag)
     DISPATCH(SingleFPSimple3d);
     DISPATCH(TripleFrictionPendulum);
 
-
     DISPATCH(RockingBC);
     DISPATCH(ASDEmbeddedNodeElement);
     DISPATCH(ASDAbsorbingBoundary2D);
@@ -748,7 +747,8 @@ TclPackageClassBroker::getNewElement(int classTag)
 Node *
 TclPackageClassBroker::getNewNode(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case NOD_TAG_Node:
 #ifdef HEAP_NODE
     return new HeapNode(classTag);
@@ -767,7 +767,8 @@ TclPackageClassBroker::getNewNode(int classTag)
 MP_Constraint *
 TclPackageClassBroker::getNewMP(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case CNSTRNT_TAG_MP_Constraint:
     return new MP_Constraint(classTag);
 
@@ -785,7 +786,8 @@ TclPackageClassBroker::getNewMP(int classTag)
 SP_Constraint *
 TclPackageClassBroker::getNewSP(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case CNSTRNT_TAG_SP_Constraint:
     return new SP_Constraint(classTag);
 
@@ -806,7 +808,8 @@ TclPackageClassBroker::getNewSP(int classTag)
 Pressure_Constraint *
 TclPackageClassBroker::getNewPC(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case CNSTRNT_TAG_Pressure_Constraint:
     return new Pressure_Constraint(classTag);
 
@@ -818,11 +821,11 @@ TclPackageClassBroker::getNewPC(int classTag)
   }
 }
 
-
 ElementalLoad *
 TclPackageClassBroker::getNewElementalLoad(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
 
   case LOAD_TAG_Beam2dUniformLoad:
     return new Beam2dUniformLoad();
@@ -858,7 +861,8 @@ TclPackageClassBroker::getNewElementalLoad(int classTag)
 CrdTransf *
 TclPackageClassBroker::getNewCrdTransf(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case CRDTR_TAG_LinearCrdTransf2d:
     return new LinearCrdTransf2d();
   case CRDTR_TAG_PDeltaCrdTransf2d:
@@ -882,7 +886,8 @@ TclPackageClassBroker::getNewCrdTransf(int classTag)
 BeamIntegration *
 TclPackageClassBroker::getNewBeamIntegration(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case BEAM_INTEGRATION_TAG_Lobatto:
     return new LobattoBeamIntegration();
 
@@ -945,7 +950,8 @@ TclPackageClassBroker::getNewBeamIntegration(int classTag)
 UniaxialMaterial *
 TclPackageClassBroker::getNewUniaxialMaterial(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case MAT_TAG_SPSW02:
     return new SPSW02(); // SAJalali
   case MAT_TAG_BoucWen:
@@ -1149,8 +1155,10 @@ TclPackageClassBroker::getNewUniaxialMaterial(int classTag)
 
     UniaxialPackage *matCommands = theUniaxialPackage;
     bool found = false;
-    while (matCommands != NULL && found == false) {
-      if ((matCommands->classTag == classTag) && (matCommands->funcPtr != 0)) {
+    while (matCommands != NULL && found == false)
+    {
+      if ((matCommands->classTag == classTag) && (matCommands->funcPtr != 0))
+      {
         UniaxialMaterial *result = (*(matCommands->funcPtr))();
         return result;
       }
@@ -1167,7 +1175,8 @@ TclPackageClassBroker::getNewUniaxialMaterial(int classTag)
 SectionForceDeformation *
 TclPackageClassBroker::getNewSection(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case SEC_TAG_Elastic2d:
     return new ElasticSection2d();
 
@@ -1229,7 +1238,8 @@ TclPackageClassBroker::getNewSection(int classTag)
 NDMaterial *
 TclPackageClassBroker::getNewNDMaterial(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case ND_TAG_ElasticIsotropicPlaneStrain2d:
     return new ElasticIsotropicPlaneStrain2D();
 
@@ -1381,7 +1391,8 @@ TclPackageClassBroker::getNewNDMaterial(int classTag)
 Fiber *
 TclPackageClassBroker::getNewFiber(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   default:
     opserr << "TclPackageClassBroker::getNewFiber - ";
     opserr << " - no Fiber type exists for class tag ";
@@ -1393,7 +1404,8 @@ TclPackageClassBroker::getNewFiber(int classTag)
 FrictionModel *
 TclPackageClassBroker::getNewFrictionModel(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case FRN_TAG_Coulomb:
     return new Coulomb();
 
@@ -1420,7 +1432,8 @@ TclPackageClassBroker::getNewFrictionModel(int classTag)
 ConvergenceTest *
 TclPackageClassBroker::getNewConvergenceTest(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case CONVERGENCE_TEST_CTestNormUnbalance:
     return new CTestNormUnbalance();
 
@@ -1456,7 +1469,8 @@ TclPackageClassBroker::getNewConvergenceTest(int classTag)
 LoadPattern *
 TclPackageClassBroker::getNewLoadPattern(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case PATTERN_TAG_LoadPattern:
     return new LoadPattern();
 
@@ -1486,7 +1500,8 @@ TclPackageClassBroker::getNewLoadPattern(int classTag)
 GroundMotion *
 TclPackageClassBroker::getNewGroundMotion(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
 
   case GROUND_MOTION_TAG_GroundMotion:
     return new GroundMotion(GROUND_MOTION_TAG_GroundMotion);
@@ -1505,7 +1520,8 @@ TclPackageClassBroker::getNewGroundMotion(int classTag)
 TimeSeries *
 TclPackageClassBroker::getNewTimeSeries(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case TSERIES_TAG_LinearSeries:
     return new LinearSeries;
 
@@ -1538,7 +1554,8 @@ TclPackageClassBroker::getNewTimeSeries(int classTag)
 TimeSeriesIntegrator *
 TclPackageClassBroker::getNewTimeSeriesIntegrator(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case TIMESERIES_INTEGRATOR_TAG_Trapezoidal:
     return new TrapezoidalTimeSeriesIntegrator();
 
@@ -1553,7 +1570,8 @@ TclPackageClassBroker::getNewTimeSeriesIntegrator(int classTag)
 Matrix *
 TclPackageClassBroker::getPtrNewMatrix(int classTag, int noRows, int noCols)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case MATRIX_TAG_Matrix:
     return new Matrix(noRows, noCols);
 
@@ -1568,7 +1586,8 @@ TclPackageClassBroker::getPtrNewMatrix(int classTag, int noRows, int noCols)
 Vector *
 TclPackageClassBroker::getPtrNewVector(int classTag, int size)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case VECTOR_TAG_Vector:
     return new Vector(size);
 
@@ -1580,10 +1599,10 @@ TclPackageClassBroker::getPtrNewVector(int classTag, int size)
   }
 }
 
-ID *
-TclPackageClassBroker::getPtrNewID(int classTag, int size)
+ID *TclPackageClassBroker::getPtrNewID(int classTag, int size)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case ID_TAG_ID:
     return new ID(size);
 
@@ -1604,7 +1623,8 @@ TclPackageClassBroker::getPtrNewID(int classTag, int size)
 OPS_Stream *
 TclPackageClassBroker::getPtrNewStream(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case OPS_STREAM_TAGS_StandardStream:
     return new StandardStream();
 
@@ -1640,7 +1660,8 @@ TclPackageClassBroker::getPtrNewStream(int classTag)
 Recorder *
 TclPackageClassBroker::getPtrNewRecorder(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case RECORDER_TAGS_ElementRecorder:
     return new ElementRecorder();
 
@@ -1670,8 +1691,6 @@ TclPackageClassBroker::getPtrNewRecorder(int classTag)
     return new VTKHDF_Recorder();
 #endif
 
-  
-
     //        case RECORDER_TAGS_MPCORecorder:
     //          return new MPCORecorder();
 
@@ -1692,7 +1711,8 @@ TclPackageClassBroker::getPtrNewRecorder(int classTag)
 ConstraintHandler *
 TclPackageClassBroker::getNewConstraintHandler(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case HANDLER_TAG_PlainHandler:
     return new PlainHandler();
 
@@ -1716,7 +1736,8 @@ TclPackageClassBroker::getNewConstraintHandler(int classTag)
 DOF_Numberer *
 TclPackageClassBroker::getNewNumberer(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case NUMBERER_TAG_DOF_Numberer:
     return new DOF_Numberer();
 
@@ -1739,7 +1760,8 @@ TclPackageClassBroker::getNewNumberer(int classTag)
 AnalysisModel *
 TclPackageClassBroker::getNewAnalysisModel(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case AnaMODEL_TAGS_AnalysisModel:
     return new AnalysisModel();
 
@@ -1754,7 +1776,8 @@ TclPackageClassBroker::getNewAnalysisModel(int classTag)
 EquiSolnAlgo *
 TclPackageClassBroker::getNewEquiSolnAlgo(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case EquiALGORITHM_TAGS_Linear:
     return new Linear();
 
@@ -1787,7 +1810,8 @@ TclPackageClassBroker::getNewEquiSolnAlgo(int classTag)
 Accelerator *
 TclPackageClassBroker::getAccelerator(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
 
   case ACCELERATOR_TAGS_Krylov:
     return new KrylovAccelerator;
@@ -1805,7 +1829,8 @@ TclPackageClassBroker::getAccelerator(int classTag)
 LineSearch *
 TclPackageClassBroker::getLineSearch(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
 
   case LINESEARCH_TAGS_BisectionLineSearch:
     return new BisectionLineSearch();
@@ -1829,7 +1854,8 @@ TclPackageClassBroker::getLineSearch(int classTag)
 DomainDecompAlgo *
 TclPackageClassBroker::getNewDomainDecompAlgo(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case DomDecompALGORITHM_TAGS_DomainDecompAlgo:
     return new DomainDecompAlgo();
 
@@ -1844,7 +1870,8 @@ TclPackageClassBroker::getNewDomainDecompAlgo(int classTag)
 StaticIntegrator *
 TclPackageClassBroker::getNewStaticIntegrator(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case INTEGRATOR_TAGS_LoadControl:
     return new LoadControl(1.0, 1, 1.0, .10); // must recvSelf
 #if 0
@@ -1858,6 +1885,8 @@ TclPackageClassBroker::getNewStaticIntegrator(int classTag)
 
   case INTEGRATOR_TAGS_ArcLength:
     return new ArcLength(1.0); // must recvSelf
+  case INTEGRATOR_TAGS_MGDCM:
+    return new MGDCM(0.5, 3, 15);
 
   default:
     opserr << "TclPackageClassBroker::getNewStaticIntegrator - ";
@@ -1870,7 +1899,8 @@ TclPackageClassBroker::getNewStaticIntegrator(int classTag)
 TransientIntegrator *
 TclPackageClassBroker::getNewTransientIntegrator(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case INTEGRATOR_TAGS_AlphaOS:
     return new AlphaOS();
 
@@ -1993,12 +2023,15 @@ TclPackageClassBroker::getNewTransientIntegrator(int classTag)
 IncrementalIntegrator *
 TclPackageClassBroker::getNewIncrementalIntegrator(int classTag)
 {
-  switch (classTag) {
+  switch (classTag)
+  {
   case INTEGRATOR_TAGS_LoadControl:
     return new LoadControl(1.0, 1, 1.0, 1.0); // must recvSelf
 
   case INTEGRATOR_TAGS_ArcLength:
     return new ArcLength(1.0); // must recvSelf
+  case INTEGRATOR_TAGS_MGDCM:
+    return new MGDCM(0.5, 3, 15);
 
   case INTEGRATOR_TAGS_Newmark:
     return new Newmark();
@@ -2021,7 +2054,8 @@ TclPackageClassBroker::getNewLinearSOE(int classTagSOE)
 {
   LinearSOE *theSOE = nullptr;
 
-  switch (classTagSOE) {
+  switch (classTagSOE)
+  {
 
   case LinSOE_TAGS_SparseGenColLinSOE:
     theSOE = new SparseGenColLinSOE();
@@ -2081,7 +2115,8 @@ TclPackageClassBroker::getNewEigenSOE(int classTagSOE)
 {
   EigenSOE *theSOE = 0;
 
-  switch (classTagSOE) {
+  switch (classTagSOE)
+  {
 
   case EigenSOE_TAGS_ArpackSOE:
     theSOE = new ArpackSOE();
@@ -2107,15 +2142,19 @@ TclPackageClassBroker::getPtrNewDDLinearSOE(int classTagSOE,
 {
   ProfileSPDLinSubstrSolver *theProfileSPDSolver = 0;
 
-  switch (classTagSOE) {
+  switch (classTagSOE)
+  {
   case LinSOE_TAGS_ProfileSPDLinSOE:
 
-    if (classTagDDSolver == SOLVER_TAGS_ProfileSPDLinSubstrSolver) {
+    if (classTagDDSolver == SOLVER_TAGS_ProfileSPDLinSubstrSolver)
+    {
       theProfileSPDSolver = new ProfileSPDLinSubstrSolver();
       LinearSOE *theSOE = new ProfileSPDLinSOE(*theProfileSPDSolver);
       lastDomainSolver = theProfileSPDSolver;
       return theSOE;
-    } else {
+    }
+    else
+    {
       opserr << "TclPackageClassBroker::getNewLinearSOE - ";
       opserr << " - no ProfileSPD Domain Solver type exists for class tag ";
       opserr << classTagDDSolver << endln;
@@ -2134,9 +2173,10 @@ DomainDecompositionAnalysis *
 TclPackageClassBroker::getNewDomainDecompAnalysis(int classTag,
                                                   Subdomain &theSubdomain)
 {
-  switch (classTag) {
-//case DomDecompANALYSIS_TAGS_DomainDecompositionAnalysis:
-//  return new DomainDecompositionAnalysis(theSubdomain);
+  switch (classTag)
+  {
+    // case DomDecompANALYSIS_TAGS_DomainDecompositionAnalysis:
+    //   return new DomainDecompositionAnalysis(theSubdomain);
 
 #ifdef _PARALLEL_PROCESSING
   case ANALYSIS_TAGS_StaticDomainDecompositionAnalysis:
@@ -2161,18 +2201,19 @@ TclPackageClassBroker::getSubdomainPtr(int classTag)
   return 0;
 }
 
-int
-TclPackageClassBroker::addUniaxialMaterial(int classTag, const char *lib,
-                                           const char *funcName,
-                                           UniaxialMaterial *(*funcPtr)(void))
+int TclPackageClassBroker::addUniaxialMaterial(int classTag, const char *lib,
+                                               const char *funcName,
+                                               UniaxialMaterial *(*funcPtr)(void))
 {
   // check to see if it's already added
 
   UniaxialPackage *matCommands = theUniaxialPackage;
   bool found = false;
-  while (matCommands != NULL && found == false) {
+  while (matCommands != NULL && found == false)
+  {
     if ((strcmp(lib, matCommands->libName) == 0) &&
-        (strcmp(funcName, matCommands->funcName) == 0)) {
+        (strcmp(funcName, matCommands->funcName) == 0))
+    {
       return 0;
     }
   }
@@ -2182,8 +2223,10 @@ TclPackageClassBroker::addUniaxialMaterial(int classTag, const char *lib,
   //
 
   void *libHandle;
-  if (funcPtr == 0) {
-    if (getLibraryFunction(lib, funcName, &libHandle, (void **)&funcPtr) != 0) {
+  if (funcPtr == 0)
+  {
+    if (getLibraryFunction(lib, funcName, &libHandle, (void **)&funcPtr) != 0)
+    {
       opserr << "TclPackageClassBroker::addUniaxialMaterial - could not find "
                 "function\n";
       return -1;
@@ -2197,7 +2240,8 @@ TclPackageClassBroker::addUniaxialMaterial(int classTag, const char *lib,
   char *libNameCopy = new char[strlen(lib) + 1];
   char *funcNameCopy = new char[strlen(funcName) + 1];
   UniaxialPackage *theMat = new UniaxialPackage;
-  if (libNameCopy == 0 || funcNameCopy == 0 || theMat == 0) {
+  if (libNameCopy == 0 || funcNameCopy == 0 || theMat == 0)
+  {
     opserr << "TclPackageClassBroker::addUniaxialMaterial - could not add lib, "
               "out of memory\n";
     return -1;
@@ -2220,7 +2264,8 @@ TclPackageClassBroker::getParameter(int classTag)
 {
   Parameter *theRes = 0;
 
-  switch (classTag) {
+  switch (classTag)
+  {
   case PARAMETER_TAG_Parameter:
     theRes = new Parameter;
     break;
