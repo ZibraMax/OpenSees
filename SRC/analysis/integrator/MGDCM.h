@@ -6,37 +6,46 @@
 
 class LinearSOE;
 class AnalysisModel;
+class FE_Element;
+class Vector;
+class Domain;
 
 class MGDCM : public StaticIntegrator
 {
 public:
 	MGDCM(double deltaLambdaBar, int maxIter, int minIter, bool momentum);
+	~MGDCM();
 
-	// core OpenSees interface
 	int newStep(void);
 	int update(const Vector &deltaU);
-	int domainChanged(void);
 	int sendSelf(int commitTag, Channel &theChannel);
 	int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
+	void Print(OPS_Stream &s, int flag = 0);
 
-	// additional utilities
-	void setDeltaLambdaBar(double d);
-
-protected:
+private:
+	void getFext();
+	double getDeltaLambda(Vector dup, Vector dur);
 	double deltaLambdaBar;
-	int increments;
+	double numgsp;
+	double lambda;
+
 	int maxIterMomentum;
 	int minIterMomentum;
+
+	int i;
+	int k;
+	int sign;
+
 	bool useMomentum;
-
-	double currentLambda;
 	double dLambda;
-	double signLastStep;
 
-	Vector *duHat; // displacement due to reference load
-	Vector *duBar; // correction vector
-	Vector *du;	   // total increment
-	Vector *phat;  // reference load vector
+	Vector *dupp1;
+	Vector *dupc1;
+
+	Vector *duHat;
+	Vector *duBar;
+	Vector *du;
+	Vector *Fext;
 };
 
 #endif

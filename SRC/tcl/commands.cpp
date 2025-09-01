@@ -195,6 +195,7 @@ extern void* OPS_AutoConstraintHandler(void);
 #include <LoadControl.h>
 #include <StagedLoadControl.h>
 #include <ArcLength.h>
+#include <MGDCM.h>
 #include <ArcLength1.h>
 #include <HSConstraint.h>
 #include <MinUnbalDispNorm.h>
@@ -4604,6 +4605,21 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
       if (Tcl_GetDouble(interp, argv[3], &alpha) != TCL_OK)	
 	return TCL_ERROR;	
       theStaticIntegrator = new ArcLength1(arcLength,alpha);       
+
+  // if the analysis exists - we want to change the Integrator
+  if (theStaticAnalysis != 0)
+    theStaticAnalysis->setIntegrator(*theStaticIntegrator);
+  }
+  /************************added for MGDCM*************************************/
+  else if (strcmp(argv[1],"MGDCM") == 0) {
+      double lambda0;
+      if (argc != 3) {
+	opserr << "WARNING integrator MGDCM lambda0 \n";
+	return TCL_ERROR;
+      }    
+      if (Tcl_GetDouble(interp, argv[2], &lambda0) != TCL_OK)	
+	return TCL_ERROR;	
+      theStaticIntegrator = new MGDCM(lambda0,15,3,false);       
 
   // if the analysis exists - we want to change the Integrator
   if (theStaticAnalysis != 0)

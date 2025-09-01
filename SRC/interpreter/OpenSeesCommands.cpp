@@ -1657,7 +1657,8 @@ int OPS_Integrator()
 
     } else if (strcmp(type,"ArcLength") == 0) {
 	si = (StaticIntegrator*)OPS_ArcLength();
-
+    }else if (strcmp(type,"MGDCM") == 0) {
+	si = (StaticIntegrator*)OPS_MGDCM();
     } else if (strcmp(type,"ArcLength1") == 0) {
 	si = (StaticIntegrator*)OPS_ArcLength1();
 

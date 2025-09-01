@@ -150,6 +150,7 @@ StaticIntegratorLibrary = {
 //{"StagedLoadControl",            G3Parse_newStagedLoadControlIntegrator},
   {"EQPath",                       G3Parse_newEQPathIntegrator},
   {"ArcLength",                    G3Parse_newArcLengthIntegrator},
+  {"MGDCM",                        G3Parse_newArcLengthIntegrator},
   {"MinUnbalDispNorm",             G3Parse_newMinUnbalDispNormIntegrator},
   {"DisplacementControl",          G3Parse_newDisplacementControlIntegrator},
 };
@@ -167,6 +168,8 @@ StaticIntegratorLibrary = {
   {"DisplacementControl", dispatch<StaticIntegrator, G3Parse_newDisplacementControlIntegrator>},
 
   {"ArcLength",           dispatch<StaticIntegrator, G3Parse_newArcLengthIntegrator>},
+
+  {"MGDCM",              dispatch<StaticIntegrator, G3Parse_newArcLengthIntegrator>},
 };
 
 std::unordered_map<std::string, Tcl_CmdProc*> 
