@@ -1886,7 +1886,7 @@ TclPackageClassBroker::getNewStaticIntegrator(int classTag)
   case INTEGRATOR_TAGS_ArcLength:
     return new ArcLength(1.0); // must recvSelf
   case INTEGRATOR_TAGS_MGDCM:
-    return new MGDCM(0.5, 3, 15);
+    return new MGDCM(0.5, 15, 3, false);
 
   default:
     opserr << "TclPackageClassBroker::getNewStaticIntegrator - ";
@@ -2031,7 +2031,7 @@ TclPackageClassBroker::getNewIncrementalIntegrator(int classTag)
   case INTEGRATOR_TAGS_ArcLength:
     return new ArcLength(1.0); // must recvSelf
   case INTEGRATOR_TAGS_MGDCM:
-    return new MGDCM(0.5, 3, 15);
+    return new MGDCM(0.5, 15, 3, false);
 
   case INTEGRATOR_TAGS_Newmark:
     return new Newmark();

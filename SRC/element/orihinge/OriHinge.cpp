@@ -231,12 +231,6 @@ OriHinge::OriHinge(int tag, int node1, int node2, int node3, int node4, double p
 	this->theta_1 = theta_1;
 	this->theta_2 = theta_2;
 	kf = pkf;
-	ndof = 6;
-	total_dof = ndof * 4;
-	theMatrix = new Matrix(total_dof, total_dof);
-	theVector = new Vector(total_dof);
-	theLoad = new Vector(total_dof);
-	theMass = new Matrix(total_dof, total_dof);
 	J = new Vector(12);
 	d2thetadxi2 = new Matrix(12, 12);
 }
@@ -280,6 +274,12 @@ void OriHinge::setDomain(Domain *theDomain)
 		}
 	}
 	this->DomainComponent::setDomain(theDomain);
+	ndof = theNodes[0]->getNumberDOF(); // assume all nodes have the same number of dof
+	total_dof = ndof * 4;
+	theMatrix = new Matrix(total_dof, total_dof);
+	theVector = new Vector(total_dof);
+	theLoad = new Vector(total_dof);
+	theMass = new Matrix(total_dof, total_dof);
 	calculateVectors();
 	theta0 = calculateTheta();
 	theta = calculateTheta();
@@ -643,7 +643,6 @@ const Matrix &OriHinge::getTangentStiff()
 			K(i * ndof + 2, j * ndof + 2) = kt(i * 3 + 2, j * 3 + 2);
 		}
 	}
-
 	return *theMatrix;
 }
 

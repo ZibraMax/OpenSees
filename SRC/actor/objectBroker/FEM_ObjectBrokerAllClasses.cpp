@@ -2923,7 +2923,7 @@ FEM_ObjectBrokerAllClasses::getNewStaticIntegrator(int classTag)
     return new ArcLength(1.0);
 
   case INTEGRATOR_TAGS_MGDCM:
-    return new MGDCM(0.5, 3, 15, false);
+    return new MGDCM(0.5, 15, 3, false);
 
   default:
     opserr << "FEM_ObjectBrokerAllClasses::getNewStaticIntegrator - ";
@@ -3068,7 +3068,7 @@ FEM_ObjectBrokerAllClasses::getNewIncrementalIntegrator(int classTag)
   case INTEGRATOR_TAGS_ArcLength:
     return new ArcLength(1.0); // must recvSelf
   case INTEGRATOR_TAGS_MGDCM:
-    return new MGDCM(0.5, 3, 15, false);
+    return new MGDCM(0.5, 15, 3, false);
 
   case INTEGRATOR_TAGS_Newmark:
     return new Newmark();

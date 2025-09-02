@@ -60,23 +60,25 @@ void *OPS_MGDCM()
 			return 0;
 		}
 		if (momentum == 1)
+		{
+			opserr << "Using MGDCM with momentum, maxIter = " << maxIter << ", minIter = " << minIter << endln;
 			return new MGDCM(lanmbda, maxIter, minIter, true);
+		}
 		else
 			return new MGDCM(lanmbda, maxIter, minIter, false);
 	}
 	else
 	{
-		return new MGDCM(lanmbda, 15, 2, false);
+		return new MGDCM(lanmbda, 15, 3, false);
 	}
 }
 
 MGDCM::MGDCM(double dLambdaBar, int maxIt, int minIt, bool momentum)
 	: StaticIntegrator(INTEGRATOR_TAGS_MGDCM),
-	  deltaLambdaBar(dLambdaBar), numgsp(0.0), maxIterMomentum(maxIt), minIterMomentum(minIt),
-	  i(0), k(0),
-	  useMomentum(momentum), dLambda(0.0),
+	  deltaLambdaBar(dLambdaBar), numgsp(0.0),
+	  i(0), k(0), dLambda(0.0),
 	  dupp1(0), dupc1(0),
-	  duHat(0), duBar(0), du(0), Fext(0)
+	  duHat(0), duBar(0), Fext(0)
 {
 	this->i = 0;
 	this->k = 0;
@@ -87,6 +89,7 @@ MGDCM::MGDCM(double dLambdaBar, int maxIt, int minIt, bool momentum)
 	this->minIterMomentum = minIt;
 	this->useMomentum = momentum;
 	this->sign = 1;
+	this->numIterLastStep = 0;
 }
 
 void MGDCM::getFext()
@@ -112,9 +115,11 @@ void MGDCM::getFext()
 			exit(-1);
 		}
 	}
-	this->formUnbalance();
+	theLinSOE->zeroB();
+	int res = this->formNodalUnbalance();
 	(*Fext) = theLinSOE->getB();
 	theModel->applyLoadDomain(currentLambda);
+	this->formUnbalance();
 }
 
 MGDCM::~MGDCM()
@@ -123,19 +128,15 @@ MGDCM::~MGDCM()
 		delete duHat;
 	if (duBar != 0)
 		delete duBar;
-	if (du != 0)
-		delete du;
 	if (Fext != 0)
 		delete Fext;
 }
 
-double MGDCM::getDeltaLambda(Vector dup, Vector duguino)
+double MGDCM::getDeltaLambda(Vector dup, Vector dur)
 {
-	Vector dur;
-	int sign;
 	if (k == 1)
 	{
-		dur = duguino * 0.0;
+		double dl;
 		if (i == 1)
 		{
 			numgsp = (dup ^ dup);
@@ -144,9 +145,7 @@ double MGDCM::getDeltaLambda(Vector dup, Vector duguino)
 			{
 				sign = -1;
 			}
-			dupp1 = new Vector(dup);
-			dupc1 = new Vector(dup);
-			return deltaLambdaBar;
+			dl = deltaLambdaBar;
 		}
 		else
 		{
@@ -156,17 +155,14 @@ double MGDCM::getDeltaLambda(Vector dup, Vector duguino)
 			{
 				nsign = -1;
 			}
+
 			sign = nsign * sign;
 			double gsp = numgsp / (dup ^ dup);
-			dupp1 = new Vector(dup);
-			dupc1 = new Vector(dup);
-			double dl = sign * deltaLambdaBar * sqrt(gsp);
-			return dl;
+			dl = sign * deltaLambdaBar * sqrt(gsp);
 		}
-	}
-	else
-	{
-		dur = duguino;
+		dupp1 = new Vector(dup);
+		dupc1 = new Vector(dup);
+		return dl;
 	}
 	return -(*dupc1 ^ dur) / (*dupc1 ^ dup);
 }
@@ -175,6 +171,7 @@ double MGDCM::getDeltaLambda(Vector dup, Vector duguino)
 int MGDCM::newStep(void)
 {
 	i++;
+	LinearSOE *theSOE = this->getLinearSOE();
 	if (i == 1)
 	{
 		this->getFext();
@@ -188,7 +185,24 @@ int MGDCM::newStep(void)
 		return -1;
 	}
 	theModel->applyLoadDomain(lambda);
-	this->formUnbalance();
+
+	if (useMomentum && i > 1)
+	{ // only from 2nd step onward
+		if (numIterLastStep <= minIterMomentum)
+		{
+			deltaLambdaBar *= 2.0; // double step size
+			opserr << "Last step iters: " << numIterLastStep << endln;
+			opserr << "Increasing step size to " << deltaLambdaBar << endln;
+		}
+		else if (numIterLastStep >= maxIterMomentum)
+		{
+			deltaLambdaBar *= 0.5; // halve step size
+			opserr << "Last step iters: " << numIterLastStep << endln;
+			opserr << "Decreasing step size to " << deltaLambdaBar << endln;
+		}
+	}
+
+	numIterLastStep = 0;
 	return 0;
 }
 
@@ -196,7 +210,7 @@ int MGDCM::update(const Vector &deltaU)
 {
 
 	k++;
-	opserr << "Entra a update i=" << i << " k=" << k << endln;
+
 	AnalysisModel *myModel = this->getAnalysisModel();
 	LinearSOE *theSOE = this->getLinearSOE();
 	if (myModel == 0 || theSOE == 0)
@@ -205,14 +219,13 @@ int MGDCM::update(const Vector &deltaU)
 		opserr << "No AnalysisModel or LinearSOE has been set\n";
 		return -1;
 	}
-	// En teoria estas dos lineas no son necesarias
-	// Aqui el problema es que por alguna razon se está calculando
-	// el x casi en Cero. Es como si no se estuviera actualizando el lambda
-	// this->formTangent();
-	// this->formUnbalance();
 	double ld = myModel->getCurrentDomainTime();
-	opserr << "lambda antes de update= " << ld << endln;
+
 	Vector duguino = theSOE->getX();
+	if (k == 1)
+	{
+		duguino = duguino * 0.0;
+	}
 	this->formTangent();
 	theSOE->setB(*Fext);
 	int res = theSOE->solve();
@@ -232,13 +245,8 @@ int MGDCM::update(const Vector &deltaU)
 			exit(-1);
 		}
 	}
-
 	(*duHat) = theSOE->getX();
-	opserr << "duHat " << *duHat << endln;
 	double dLambda = this->getDeltaLambda(*duHat, duguino);
-	opserr << "dlambda " << dLambda << endln;
-	opserr << "duguino " << duguino << endln;
-
 	Vector du = *duHat * dLambda + duguino;
 	myModel->incrDisp(du);
 	if (myModel->updateDomain() < 0)
@@ -249,6 +257,7 @@ int MGDCM::update(const Vector &deltaU)
 	lambda += dLambda;
 	myModel->applyLoadDomain(lambda);
 	theSOE->setX(du);
+	numIterLastStep = k;
 
 	return 0;
 }

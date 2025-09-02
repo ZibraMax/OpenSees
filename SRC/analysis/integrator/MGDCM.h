@@ -28,6 +28,7 @@ private:
 	double deltaLambdaBar;
 	double numgsp;
 	double lambda;
+	int numIterLastStep;
 
 	int maxIterMomentum;
 	int minIterMomentum;
@@ -44,7 +45,6 @@ private:
 
 	Vector *duHat;
 	Vector *duBar;
-	Vector *du;
 	Vector *Fext;
 };
 
